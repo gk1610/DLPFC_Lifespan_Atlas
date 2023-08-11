@@ -1,5 +1,24 @@
+.libPaths(c("/sc/arion/projects/CommonMind/kiran/RLib_4_3",.libPaths()))
+
+suppressPackageStartupMessages({
+library(zellkonverter)
+library(basilisk)
 library(dreamlet)
 library(crumblr)
+library(foreach)
+library(doParallel)
+library(SingleCellExperiment)
+library(dreamlet)
+library(zenith)
+library(DelayedArray)
+library(GSEABase)
+library(scater)
+library(tidyverse)
+library(ggplot2)
+library(cowplot) 
+library(org.Hs.eg.db)
+library(R.utils)
+})
 
 ## Example code for "no duplicates" matrices
 
