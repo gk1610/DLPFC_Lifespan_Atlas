@@ -1,3 +1,7 @@
+### in terminal type this
+### module load R/4.3.0
+
+
 .libPaths(c("/sc/arion/projects/CommonMind/kiran/RLib_4_3",.libPaths()))
 
 suppressPackageStartupMessages({
