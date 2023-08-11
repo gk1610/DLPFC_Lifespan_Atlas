@@ -8,7 +8,7 @@ devtools::install_github("DiseaseNeurogenomics/zenith")
 
 
 
-.libPaths(c("/sc/arion/projects/CommonMind/kiran/RLib_4_3",.libPaths()))
+.libPaths(c("/sc/arion/projects/psychAD/Madeline/Rlib_4_3","/sc/arion/projects/CommonMind/kiran/RLib_4_3",.libPaths()))
 
 suppressPackageStartupMessages({
 library(zellkonverter)
