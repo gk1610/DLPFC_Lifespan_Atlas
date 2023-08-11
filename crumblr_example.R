@@ -2,6 +2,11 @@
 ### module load R/4.3.0 udunits proj geos
 ### R --no-restore
 
+devtools::install_github("DiseaseNeurogenomics/dreamlet")
+devtools::install_github("DiseaseNeurogenomics/variancePartition")
+devtools::install_github("DiseaseNeurogenomics/zenith")
+
+
 
 .libPaths(c("/sc/arion/projects/CommonMind/kiran/RLib_4_3",.libPaths()))
 
