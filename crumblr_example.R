@@ -1,5 +1,5 @@
 ### in terminal type this
-### module load R/4.3.0
+### module load R/4.3.0 udunits proj geos
 ### R --no-restore
 
 
