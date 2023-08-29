@@ -20,15 +20,16 @@ library(R.utils)
 })
 library(data.table)
 
-celltype=args[1] # like OPC .. can be done for subclasses also
-ii=as.numeric(args[2]) ## this is the index for contrast_age_groups_list in line 60
+args = commandArgs(trailingOnly=TRUE)
 
+cell_groups=args[1]
+celltype=args[2]
+age_group=args[3]
 
 file="/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/h5ad_final/AGING_2023-04-01_16_14.h5ad"
 sce = readH5AD(file, use_hdf5=TRUE, verbose=TRUE)
 assayNames(sce)[1] = "counts"
 sce1=subset(sce, ,subclass==celltype)
-
 
 pb = aggregateToPseudoBulk(sce1,
       assay = "counts",
@@ -64,6 +65,8 @@ contrast_age_groups_list=list(
 "adulthood"=df$SubID[df$Age>=20 & df$Age<60],
 "adulthood_old"=df$SubID[df$Age>=20])
 
+keep_subids_age_group=contrast_age_groups_list[[age_group]]
+
 ### print number of samples in each group
 
 lapply(contrast_age_groups_list,length)
@@ -89,7 +92,7 @@ metadata_daynight_merged=metadata_daynight_merged[metadata_daynight_merged$Day_N
 
 ### subset samples for a given age group contrast
 
-metadata_daynight_merged_subset=metadata_daynight_merged[metadata_daynight_merged$SubID %in% contrast_age_groups_list[[ii]],]
+metadata_daynight_merged_subset=metadata_daynight_merged[metadata_daynight_merged$SubID %in% keep_subids_age_group,]
 
 ### subsetting pseudobulk for a given age group 
 
@@ -99,10 +102,10 @@ pb_subset=subset(pb, ,SubID %in% keep_subids)
 metadata_daynight_merged_ordered = metadata_daynight_merged_subset[match(colnames(pb_subset),as.character(metadata_daynight_merged_subset$SubID)),]
 identical(as.character(metadata_daynight_merged_ordered$SubID),colnames(pb_subset))
 rownames(metadata_daynight_merged_ordered)=metadata_daynight_merged_ordered$SubID
+metadata_daynight_merged_ordered$cat_Day_Night=factor(metadata_daynight_merged_ordered$Day_Night,levels=c(1,2),labels=c("Day","Night"))
 colData(pb_subset)=DataFrame(metadata_daynight_merged_ordered)
 
 ### making the day night contrast as factor
-metadata_daynight_merged_ordered$cat_Day_Night=factor(metadata_daynight_merged_ordered$Day_Night,levels=c(1,2),labels=c("Day","Night"))
 table(metadata_daynight_merged_ordered$cat_Day_Night)
 
 
@@ -119,15 +122,11 @@ form <- as.formula(" ~ 0 + cat_Day_Night + (1 | prep) + (1 | pool) + scale(PMI) 
 res.proc=processAssays(pb_subset,form, min.count=5)
 
 contrasts <- c(Diff = "cat_Day_NightDay - cat_Day_NightNight")
-res.dl=dreamlet(res.proc,form),contrasts = contrasts)
+res.dl=dreamlet(res.proc,form,contrasts = contrasts)
 coefNames(res.dl)
 
 #results <- topTable(res.dl[[1]], coef = "Diff")
 
-save(res.dl,form,metadata_daynight_merged_ordered,file=paste0("/sc/arion/projects/psychAD/aging/sleep_patterns/analysis/dreamlet/Subid_day_night_",names(contrast_age_groups_list)[ii],".RDATA"))
-
-
-
-
+save(res.dl,form,metadata_daynight_merged_ordered,file=paste0("/sc/arion/projects/psychAD/aging/sleep_patterns/dreamlet/",cell_groups,"_day_night_",age_group,".RDATA"))
 
 
