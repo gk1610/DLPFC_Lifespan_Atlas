@@ -49,13 +49,13 @@ df$groups[df$Age>=40 & df$Age<60]="late_adulthood"
 df$groups[df$Age>=60]="old"
 
 #1.1 DxN of Individual Groups 
-#Group 4_Early Adulthood(20-39):   Day - n = 18    Night - n = 23
-#Group 5_Late Adulthood(40-59):    Day - n = 47    Night - n = 16
-#Group 6_Old Age (>=60):            Day - n = 51    Night - n = 25
+#Group 4_Early Adulthood(20-39):   Day - n = 18    Night - n = 24
+#Group 5_Late Adulthood(40-59):    Day - n = 49    Night - n = 16
+#Group 6_Old Age (>=60):            Day - n = 51    Night - n = 26
 
 #1.2 DxN of Combined Groups 
-#Group 4-5_Adulthood(20-59):       Day - n = 65    Night - n = 39
-#Group 4-6_Adulthood+Old Age(>=20)  Day - n = 116   Night - n = 66
+#Group 4-5_Adulthood(20-59):       Day - n = 67    Night - n = 40
+#Group 4-6_Adulthood+Old Age(>=20)  Day - n = 118   Night - n = 66
 
 contrast_age_groups_list=list(
 "early_adulthood"=df$SubID[df$Age>=20 & df$Age<40],
