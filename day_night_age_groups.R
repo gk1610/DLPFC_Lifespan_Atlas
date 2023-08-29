@@ -20,8 +20,8 @@ library(R.utils)
 })
 library(data.table)
 
-celltype=args[1]
-ii=as.numeric(args[2])
+celltype=args[1] # like OPC .. can be done for subclasses also
+ii=as.numeric(args[2]) ## this is the index for contrast_age_groups_list in line 60
 
 
 file="/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/h5ad_final/AGING_2023-04-01_16_14.h5ad"
