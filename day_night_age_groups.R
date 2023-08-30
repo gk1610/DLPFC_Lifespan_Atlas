@@ -127,6 +127,5 @@ coefNames(res.dl)
 
 #results <- topTable(res.dl[[1]], coef = "Diff")
 
-save(res.dl,form,metadata_daynight_merged_ordered,file=paste0("/sc/arion/projects/psychAD/aging/sleep_patterns/dreamlet/",cell_groups,"_day_night_",age_group,".RDATA"))
-
+save(res.dl,form,metadata_daynight_merged_ordered,file=paste0("/sc/arion/projects/psychAD/aging/sleep_patterns/dreamlet/",cell_groups,"_day_night_",celltype,"_",age_group,".RDATA"))
 
