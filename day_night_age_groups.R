@@ -98,6 +98,8 @@ metadata_daynight_merged_subset=metadata_daynight_merged[metadata_daynight_merge
 
 keep_subids=colnames(pb)[match(metadata_daynight_merged_subset$SubID,colnames(pb))]
 pb_subset=subset(pb, ,SubID %in% keep_subids)
+colData(pb_subset)$scale_age=scale(colData(pb_subset)$Age)
+
 
 metadata_daynight_merged_ordered = metadata_daynight_merged_subset[match(colnames(pb_subset),as.character(metadata_daynight_merged_subset$SubID)),]
 identical(as.character(metadata_daynight_merged_ordered$SubID),colnames(pb_subset))
@@ -108,24 +110,21 @@ colData(pb_subset)=DataFrame(metadata_daynight_merged_ordered)
 ### making the day night contrast as factor
 table(metadata_daynight_merged_ordered$cat_Day_Night)
 
-
-if (uniqueN(colData(pb_subset)$Source)>1) {
-
-form <- as.formula(" ~ 0  + cat_Day_Night + (1 | Source) + (1 | prep) + (1 | pool) + scale(PMI) + log_n_counts + (1|Sex)")
-
-} else {
-
-form <- as.formula(" ~ 0 + cat_Day_Night + (1 | prep) + (1 | pool) + scale(PMI) + log_n_counts + (1|Sex)")
-
-}
-
-res.proc=processAssays(pb_subset,form, min.count=5)
-
+model1 <- as.formula(" ~ 0  + cat_Day_Night + (1 | Source) + (1 | prep) + (1 | pool) + scale(PMI) + log_n_counts + (1|Sex)")
+res.proc_model1=processAssays(pb_subset,model1, min.count=5)
 contrasts <- c(Diff = "cat_Day_NightDay - cat_Day_NightNight")
-res.dl=dreamlet(res.proc,form,contrasts = contrasts)
-coefNames(res.dl)
+res.dl_model1=dreamlet(res.proc_model1,model1,contrasts = contrasts)
+coefNames(res.dl_model1)
 
-#results <- topTable(res.dl[[1]], coef = "Diff")
+model2 <- as.formula(" ~ 0  + Day_Night*scale_age + (1 | Source) + (1 | prep) + (1 | pool) + scale(PMI) + log_n_counts + (1|Sex)")
+res.proc_model2=processAssays(pb_subset,model2, min.count=5)
+res.dl_model2=dreamlet(res.proc_model2,model2)
+coefNames(res.dl_model2)
 
-save(res.dl,form,metadata_daynight_merged_ordered,file=paste0("/sc/arion/projects/psychAD/aging/sleep_patterns/dreamlet/",cell_groups,"_day_night_",celltype,"_",age_group,".RDATA"))
+save(res.dl_model1,res.dl_model2,model1,model2,file=paste0("/sc/arion/projects/psychAD/aging/sleep_patterns/dreamlet/",cell_groups,"_day_night_",celltype,"_",age_group,".RDATA"))
+
+
+
+
+
 
