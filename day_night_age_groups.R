@@ -125,13 +125,12 @@ res.dl_model2=dreamlet(res.proc_model2,model2,contrasts = contrasts)
 coefNames(res.dl_model2)
 
 ## to see the impact of Day night on gene expression as a function of age
-
 model3 <- as.formula(" ~ 0  + cat_Day_Night*scale_age + (1 | Source) + (1 | prep) + (1 | pool) + scale(PMI) + log_n_counts + (1|Sex)")
 res.proc_model3=processAssays(pb_subset,model3, min.count=5)
 res.dl_model3=dreamlet(res.proc_model3,model3)
 coefNames(res.dl_model3)
 
-save(res.dl_model1,res.dl_model2,res.dl_model3,model1,model2,model3,file=paste0("/sc/arion/projects/psychAD/aging/sleep_patterns/dreamlet/",cell_groups,"_day_night_",celltype,"_",age_group,".RDATA"))
+save(res.dl_model1,res.dl_model2,res.dl_model3,model1,model2,model3,file=paste0("/sc/arion/projects/psychAD/aging/sleep_patterns/analysis/dreamlet/",cell_groups,"_day_night_",celltype,"_",age_group,".RDATA"))
 
 
 
