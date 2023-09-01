@@ -22,9 +22,10 @@ library(data.table)
 
 args = commandArgs(trailingOnly=TRUE)
 
-cell_groups=args[1]
-celltype=args[2]
-age_group=args[3]
+cell_groups=args[1] #subclass or subtype
+celltype=args[2] #Astro or OPCs. 
+age_group=args[3] # adulthood or adulthood or old
+
 
 file="/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/h5ad_final/AGING_2023-04-01_16_14.h5ad"
 sce = readH5AD(file, use_hdf5=TRUE, verbose=TRUE)
