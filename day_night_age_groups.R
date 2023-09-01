@@ -116,7 +116,7 @@ contrasts <- c(Diff = "cat_Day_NightDay - cat_Day_NightNight")
 res.dl_model1=dreamlet(res.proc_model1,model1,contrasts = contrasts)
 coefNames(res.dl_model1)
 
-model2 <- as.formula(" ~ 0  + Day_Night*scale_age + (1 | Source) + (1 | prep) + (1 | pool) + scale(PMI) + log_n_counts + (1|Sex)")
+model2 <- as.formula(" ~ 0  + cat_Day_Night*scale_age + (1 | Source) + (1 | prep) + (1 | pool) + scale(PMI) + log_n_counts + (1|Sex)")
 res.proc_model2=processAssays(pb_subset,model2, min.count=5)
 res.dl_model2=dreamlet(res.proc_model2,model2)
 coefNames(res.dl_model2)
