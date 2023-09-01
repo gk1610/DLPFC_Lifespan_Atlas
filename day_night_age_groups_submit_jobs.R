@@ -21,7 +21,7 @@ system(paste0("bsub<",script_filename))
 }
 }
 
-mem=355000
+mem=95000
 
 args = commandArgs(trailingOnly=TRUE)
 
