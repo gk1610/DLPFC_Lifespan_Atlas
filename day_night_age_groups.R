@@ -108,7 +108,11 @@ colData(pb_subset)$scale_age=scale(colData(pb_subset)$Age)
 
 ### making the day night contrast as factor
 table(metadata_daynight_merged_ordered$cat_Day_Night)
-colData(pb_subset)$scale_age=scale(colData(pb_subset)$Age)
+colData(pb_subset)$scale_age=scale(colData(pb_subset)$Age) #[MRS note] think this is an error - same as line 107
+
+#[MRS] I think this is what we need to add to add day night contrast as a factor
+colData(pb_subset)$cat_Day_NightDay = factor(pb_subset$cat_Day_Night, level=c("Day"))
+colData(pb_subset)$cat_Day_NightNight = factor(pb_subset$cat_Day_Night, level=c("Night"))
 
 ## to see the impact of Day night on gene expression
 
