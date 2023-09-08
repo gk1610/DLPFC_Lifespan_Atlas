@@ -66,4 +66,8 @@ res.dl = dreamlet(res.proc, form)
 res_mat = residuals(res.dl[[1]],res.proc[[1]], type="pearson")
 res_mat_non_pearson = residuals(res.dl[[1]],res.proc[[1]])
 
-save(res_mat,res_mat_non_pearson,form,file=paste0("/sc/arion/projects/CommonMind/aging/analysis/dream/residuals/subclass/channel_",celltype,"_",brain_bank,"_samples_pearson_and_non_pearson_residuals.RDATA"))
+metadata_all=as.data.frame(colData(res.proc))
+metadata_celltype=metadata[match(colnames(res_mat),metadata$Channel),]
+identical(as.character(metadata_celltype$Channel),colnames(res_mat))
+
+save(metadata_all,metadata_celltype,res_mat,res_mat_non_pearson,form,file=paste0("/sc/arion/projects/CommonMind/aging/analysis/dream/residuals/subclass/channel_",celltype,"_",brain_bank,"_samples_pearson_and_non_pearson_residuals.RDATA"))
