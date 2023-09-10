@@ -1,4 +1,7 @@
 
+RAW file
+file="/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/h5ad_final/AGING_2023-04-01_16_14.h5ad"
+
 ### this is our pseudobulk files to be used for any downstream analysis
 ### no duplicates matrices
 ### class
