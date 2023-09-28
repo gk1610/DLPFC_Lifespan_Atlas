@@ -1,34 +1,23 @@
-#ENTER DATA AND SET UP FOR RUNNING ANALYSIS
+source("/sc/arion/projects/psychAD/aging/Circadian/scripts/cosinor.R")
+args = commandArgs(trailingOnly=TRUE)
+celltype=args[1]
 
-#logcpm values format: column names are subject ids and row names are gene ids
-data <- read.csv("~/Desktop/Panos Collab/v0_pseudoExpr/v0_Astro.csv", row.names = 1)
-#TOD values and matching subject IDs
-pheno <- read.csv ("~/Desktop/Panos Collab/pb_metadata.csv", row.names = 1)
+# here res_mat is residualized data and metadata saved as RDATA object
+load("/sc/arion/projects/psychAD/aging/Circadian/analysis/residuals/channel_OPC_adulthood_old.RDATA")
 
-#For the single cell pilot I did a bunch of filtering and subsetting - probably will not be necessary here but just in case:
+data=res_mat
+pheno=metadata_celltype
 
-#add in columns with "1" for each cell type - filter by cell type 
-pheno_cell <- filter(pheno, pheno$Astro == "1")
+## you can use TOD from here
+metadata_daynight=read.csv("/sc/arion/projects/psychAD/aging/sleep_patterns/metadata_aging_TOD_DayNight.csv")
+metadata_daynight=metadata_daynight[metadata_daynight$Day_Night!=0,]
 
-#filter by group - NA = Non-AD, AD = Alzheimer's, Com = Small comparison group (no SZ)
-pheno_cell_NA <- filter(pheno_cell, pheno_cell$Dx == "Control")
-pheno_cell_AD <- filter(pheno_cell, pheno_cell$Dx == "AD")
-pheno_cell_Com <- filter(pheno_cell, pheno_cell$COM == "1")
+### subsetting data for only samples with TOD values
 
-#THIS IS PROBABLY THE PART WE NEED 
-#Make a data table- sub.data = data[,match(pheno$ID,colnames(data))]
-cell.data = data[,match(pheno_cell$ID,colnames(data))]
-colnames(data)
-
-#Filter by group 
-cell_Com.data = cell.data[,which((colnames(cell.data) %in% pheno_cell_Com$ID) == TRUE)]
-
-#Way to check your names - all(pheno_Astro$ID == colnames(data))
-all(pheno_cell_Com$ID == colnames(cell_Com.data))
-SubID <- pheno_Astro_Com$SubID
+pheno_subset=pheno[match(metadata_$SubID,colnames())]
+pb_subset=subset(pb, ,SubID %in% keep_subids)
 
 #END DATA SET UP 
-
 
 #ACTUAL RUNNING OF THE COSINOR CODE
 out.list = mclapply(1:nrow(cell_Com.data), function(i){ 
