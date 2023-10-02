@@ -34,7 +34,7 @@ out.list = mclapply(1:nrow(res_mat_with_TOD), function(i){
 out.tab = do.call(rbind.data.frame, out.list)
 out.tab$qvalue = p.adjust(out.tab$pvalue, "BH")
 out.tab$peak = 24 - out.tab$phase*24/(2*pi)
-row.names(out.tab) = row.names(cell.data)
+row.names(out.tab) = row.names(res_mat_with_TOD)
 
-save(out.tab,file=paste0("/sc/arion/projects/psychAD/aging/Circadian/analysis/residuals/channel_",celltype,"_adulthood_old.RDATA"))
+write.csv(out.tab,file=paste0("/sc/arion/projects/psychAD/aging/Circadian/analysis/residuals/channel_",celltype,"_adulthood_old_rhythms.csv"))
 
