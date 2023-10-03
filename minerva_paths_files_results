@@ -9,6 +9,9 @@ Aging+Lister
 
 /sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_beforeUMAT_full_adata.h5ad
 
+# easy to read in R
+
+/sc/arion/projects/psychAD/NPS-AD/freeze2_proc/230816_PsychAD_cross-disorder_analysis/aging_lister_combined_ds1000_rmno_beforeUMAT_full_adata_fixed.h5ad
 
 ### this is our pseudobulk files to be used for any downstream analysis
 ### no duplicates matrices
