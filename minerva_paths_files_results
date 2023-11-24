@@ -42,6 +42,18 @@ Aging+Lister
 /sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_Micro_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_v3.RDS
 /sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_OPC_Oligo_withlabels_sparse_123456_top200_dreamlet_updown_half_25_X_umat_kriegstein_afterCombination_cds_v3.RDS
 
+### 500 meta-cells for different lineages from Hui
+### extended cds object in R (can be accessed throught cds@expression$lineage_name for expression, cds@pseudotime$lineage_name for pseudotime)
+/sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_AST_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_compressed_v3.RDS
+/sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_EN_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_compressed_v3.RDS
+/sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_IN_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_compressed_v3.RDS
+/sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_Micro_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_compressed_v3.RDS
+/sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_OPC_Oligo_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_compressed_v3.RDS
+### merged h5ad file
+/sc/arion/projects/CommonMind/aging/hui/files/500_meta_cell_lineage_h5ad/500_meta_cell_lineage_merged.h5ad
+
+
+
 ###PACScores
 /sc/arion/projects/psychAD/aging/PACscores/hbcc_aging_obs.csv
 
