@@ -35,6 +35,13 @@ Aging+Lister
 ### sublcass
 /sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2023-06-09_01_45_PB_Channel_subclass.RDS
 
+### h5ad file for different lineages including UMAT / UMAP from Hui
+/sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_EN_withlabels_sparse_123456_clustering.h5ad
+/sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_IN_withlabels_sparse_123456_clustering.h5ad
+/sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_AST_withlabels_sparse_123456_clustering.h5ad
+/sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_Micro_withlabels_sparse_123456_clustering.h5ad
+/sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_OPC_Oligo_withlabels_sparse_123456_clustering.h5ad
+
 ### pseudotime for different lineages from Hui
 /sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_EN_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_v3.RDS
 /sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_IN_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_v3.RDS
