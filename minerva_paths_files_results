@@ -49,6 +49,13 @@ Aging+Lister
 /sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_Micro_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_v3.RDS
 /sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_OPC_Oligo_withlabels_sparse_123456_top200_dreamlet_updown_half_25_X_umat_kriegstein_afterCombination_cds_v3.RDS
 
+### Extract cell_id and pseudotime for different lineages from Hui
+/sc/arion/projects/CommonMind/aging/hui/files/pseudotime/EN_X_umat_v3_pseudotime.csv
+/sc/arion/projects/CommonMind/aging/hui/files/pseudotime/IN_X_umat_v3_pseudotime.csv
+/sc/arion/projects/CommonMind/aging/hui/files/pseudotime/AST_X_umat_v3_pseudotime.csv
+/sc/arion/projects/CommonMind/aging/hui/files/pseudotime/Micro_X_umat_v3_pseudotime.csv
+/sc/arion/projects/CommonMind/aging/hui/files/pseudotime/OPC_Oligo_X_umat_diffparas_v3_pseudotime.csv
+
 ### 500 meta-cells for different lineages from Hui
 ### extended cds object in R (can be accessed throught cds@expression$lineage_name for expression, cds@pseudotime$lineage_name for pseudotime)
 /sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_AST_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_compressed_v3.RDS
