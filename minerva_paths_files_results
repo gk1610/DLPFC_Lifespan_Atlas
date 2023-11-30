@@ -8,7 +8,7 @@ RAW file
 file="/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/h5ad_final/AGING_2023-09-12_20_35.h5ad"
 
 # Processed Aging cohort using minimum covariates: ~sex + PMI + log(n_genes) + batchID
-/sc/arion/projects/CommonMind/aging/hui/files/combined_pc_normed_hvg_regressed_harmony_2023-09-12_20_35.h5ad (synID:)
+/sc/arion/projects/CommonMind/aging/hui/files/combined_pc_normed_hvg_regressed_harmony_2023-09-12_20_35.h5ad (syn53065349)
 # Processed HBCC cohort using minimum covariates: ~sex + PMI + log(n_genes) + batchID
 /sc/arion/projects/CommonMind/aging/hui/files/hbcc_pc_normed_hvg_regressed_harmony_2023-09-12_20_35.h5ad (syn52928681)
 
