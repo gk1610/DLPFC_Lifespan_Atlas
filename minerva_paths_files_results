@@ -7,7 +7,8 @@ L6_IT_2, L6_IT1, L6_CT, L5_6_NP, L6B, L3_5_IT_3, L3_5_IT_1, L3_5_IT_2, L2_3_IT.
 RAW file
 file="/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/h5ad_final/AGING_2023-09-12_20_35.h5ad"
 
-## colormap=read.csv("/sc/arion/projects/CommonMind/aging/resources/230921_PsychAD_color_palette.csv")
+## colormap
+cmap=read.csv("/sc/arion/projects/CommonMind/aging/resources/230921_PsychAD_color_palette.csv")
 
 
 # Processed Aging cohort using minimum covariates: ~sex + PMI + log(n_genes) + batchID
@@ -80,6 +81,8 @@ Aging+Lister
 ###PACScores
 /sc/arion/projects/psychAD/aging/PACscores/hbcc_aging_obs.csv
 
+### raw and residuals crumblr cell composition using bestModel="~ (1 | BatchID) + (1|Source) + scale_PMI + log_n_genes"
+:/sc/arion/projects/CommonMind/aging/resources/cell_composition_subclass.RDATA
 
 
 
