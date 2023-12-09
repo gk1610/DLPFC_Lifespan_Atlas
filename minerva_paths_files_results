@@ -84,6 +84,7 @@ Aging+Lister
 ### raw and residuals crumblr cell composition using bestModel="~ (1 | BatchID) + (1|Source) + scale_PMI + log_n_genes"
 :/sc/arion/projects/CommonMind/aging/resources/cell_composition_subclass.RDATA
 
+scDRS_scores=fread("/sc/arion/projects/CommonMind/aging/analysis/scdrs/trait_scores_all_RNA_Aging100perc.csv")
 
 
 
