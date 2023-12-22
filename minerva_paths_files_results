@@ -2,6 +2,19 @@
 
 https://www.synapse.org/#!Synapse:syn22343687/wiki/620914
 
+# age groups based on https://www.nature.com/articles/nature10523
+neonatal = 0-1years
+childhood = 2-11years
+adolescence = 12-19years
+young adulthood = 20-39years
+middle adulthood = 40-59years
+late adulthood = > 60years
+
+# current color pallete for age groups
+agec=  ['#FFEBCC','#FFDAB9','#FFC58C','#FFA54F','#FF8C00', '#D2691E']
+custom_order = ['Neonatal','Childhood','Adolescence','Young Adulthood','Middle Adulthood','Late Adulthood']
+
+
 ## EN lineages from Hui
 L6_IT_2, L6_IT1, L6_CT, L5_6_NP, L6B, L3_5_IT_3, L3_5_IT_1, L3_5_IT_2, L2_3_IT.
 
