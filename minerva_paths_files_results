@@ -12,6 +12,8 @@ topTable_combined.tsv.gz
 
 /sc/arion/projects/CommonMind/aging/resources/Xenium_gene_list_05_04.csv
 
+# list of cotrasts from Jaro: https://www.synapse.org/#!Synapse:syn51114763 (google doc link or below)
+/sc/arion/projects/psychAD/NPS-AD/freeze1_rc/metadata/contrasts_for_dreamlet.Rdata
 
 
 # age groups based on https://www.nature.com/articles/nature10523
