@@ -95,10 +95,10 @@ Aging+Lister
 /sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_Micro_withlabels_sparse_123456_X_umat_kriegstein_afterCombination_cds_v3.RDS
 /sc/arion/projects/CommonMind/aging/hui/files/aging_lister_combined_ds1000_rmno_OPC_Oligo_withlabels_sparse_123456_top200_dreamlet_updown_half_25_X_umat_kriegstein_afterCombination_cds_v3.RDS
 
-### DEGs for different lineages from Hui
+### DEGs for each lineage using moran test from Hui
 /sc/arion/projects/CommonMind/aging/hui/files/DEGs_moran_test/modified_10000/*_pt_DGE*txt
 
-### DEGs for different branch from Hui
+### branch-specific DEGs from Hui
 /sc/arion/projects/CommonMind/aging/hui/files/DEGs_moran_test/modified_10000/branch_spec/*.txt
 
 ### sex-specific DEGs for different lineages from Hui (only for AST now)
