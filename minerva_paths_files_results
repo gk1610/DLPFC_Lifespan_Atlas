@@ -6,6 +6,8 @@ https://www.synapse.org/#!Synapse:syn22343687/wiki/620914
 topTable_combined.tsv.gz
 
 /sc/arion/projects/CommonMind/aging/resources/topTable_combined.tsv.gz
+zcat /sc/arion/projects/CommonMind/aging/resources/topTable_combined.tsv.gz | grep AGING > /sc/arion/projects/CommonMind/aging/resources/topTable_combined_AGING.tsv
+
 
 # markers list for psychAD project from donghoon
 # His comment was “Markers are tricky because once you try to create markers for subtypes, you don’t get the specificity. 
