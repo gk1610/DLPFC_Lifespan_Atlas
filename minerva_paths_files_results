@@ -27,6 +27,24 @@ young adulthood = 20-39years
 middle adulthood = 40-59years
 late adulthood = > 60years
 
+# usage
+pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-01-05_13_31_PB_SubID_subclass.RDS")
+colData(pb)$groups="NA"
+colData(pb)$groups[colData(pb)$Age<1]="Neonatal"
+colData(pb)$groups[colData(pb)$Age>=1 & colData(pb)$Age<12]="Childhood"
+colData(pb)$groups[colData(pb)$Age>=12 & colData(pb)$Age<20]="Adolescence"
+colData(pb)$groups[colData(pb)$Age>=20 & colData(pb)$Age<40]="Young_Adulthood"
+colData(pb)$groups[colData(pb)$Age>=40 & colData(pb)$Age<60]="Middle_Adulthood"
+colData(pb)$groups[colData(pb)$Age>=60]="Late_Adulthood"
+
+table(colData(pb)$groups)
+
+     Adolescence        Childhood   Late_Adulthood Middle_Adulthood
+              34               12               80               79
+        Neonatal  Young_Adulthood
+              12               49
+
+
 # current color pallete for age groups
 #previous color scheme  ###agec=  ['#FFEBCC','#FFDAB9','#FFC58C','#FFA54F','#FF8C00', '#D2691E']
 custom_order = ['Neonatal','Childhood','Adolescence','Young Adulthood','Middle Adulthood','Late Adulthood']
