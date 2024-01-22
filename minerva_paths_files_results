@@ -44,6 +44,15 @@ table(colData(pb)$groups)
         Neonatal  Young_Adulthood
               12               49
 
+                  Source
+groups              H  M
+  Neonatal         12  0
+  Childhood        12  0
+  Adolescence      34  0
+  Young_Adulthood  39 10
+  Middle_Adulthood 44 35
+  Late_Adulthood   12 68
+
 
 # current color pallete for age groups
 #previous color scheme  ###agec=  ['#FFEBCC','#FFDAB9','#FFC58C','#FFA54F','#FF8C00', '#D2691E']
