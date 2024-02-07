@@ -30,7 +30,7 @@ middle adulthood = 40-59years
 late adulthood = > 60years
 
 # usage
-pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-01-05_13_31_PB_SubID_subclass.RDS")
+pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-02-01_22_23_PB_SubID_subclass.RDS")
 colData(pb)$groups="NA"
 colData(pb)$groups[colData(pb)$Age<1]="Neonatal"
 colData(pb)$groups[colData(pb)$Age>=1 & colData(pb)$Age<12]="Childhood"
