@@ -12,11 +12,10 @@ topTable_combined.tsv.gz
 zcat /sc/arion/projects/CommonMind/aging/resources/topTable_combined.tsv.gz | grep AGING > /sc/arion/projects/CommonMind/aging/resources/topTable_combined_AGING.tsv
 
 
-# markers list for psychAD project from donghoon
-# His comment was “Markers are tricky because once you try to create markers for subtypes, you don’t get the specificity. 
-# For this reason, I think it’s best to show markers for subclass and use subtype when it is necessary”
+# markers list for psychAD project from Tereza and donghoon (Feb 6 2024)
+/sc/arion/projects/psychAD/NPS-AD/freeze2_proc/231109_PsychAD_capstone_F2/240131_PsychAD_freeze3_markers_all_final.csv
 
-/sc/arion/projects/CommonMind/aging/resources/Xenium_gene_list_05_04.csv
+#/sc/arion/projects/CommonMind/aging/resources/Xenium_gene_list_05_04.csv
 
 # list of cotrasts from Jaro: https://www.synapse.org/#!Synapse:syn51114763 (google doc link or below)
 /sc/arion/projects/psychAD/NPS-AD/freeze1_rc/metadata/contrasts_for_dreamlet.Rdata
