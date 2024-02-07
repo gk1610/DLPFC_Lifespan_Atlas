@@ -20,7 +20,6 @@ zcat /sc/arion/projects/CommonMind/aging/resources/topTable_combined.tsv.gz | gr
 # list of cotrasts from Jaro: https://www.synapse.org/#!Synapse:syn51114763 (google doc link or below)
 /sc/arion/projects/psychAD/NPS-AD/freeze1_rc/metadata/contrasts_for_dreamlet.Rdata
 
-
 # age groups based on https://www.nature.com/articles/nature10523
 neonatal = 0-1years
 childhood = 2-11years
@@ -42,18 +41,18 @@ colData(pb)$groups[colData(pb)$Age>=60]="Late_Adulthood"
 table(colData(pb)$groups)
 
      Adolescence        Childhood   Late_Adulthood Middle_Adulthood
-              34               12               80               79
+              34               12               83               95
         Neonatal  Young_Adulthood
-              12               49
+              12               55
 
                   Source
 groups              H  M
   Neonatal         12  0
   Childhood        12  0
   Adolescence      34  0
-  Young_Adulthood  39 10
-  Middle_Adulthood 44 35
-  Late_Adulthood   12 68
+  Young_Adulthood  45 10
+  Middle_Adulthood 60 35
+  Late_Adulthood   15 68
 
 
 # current color pallete for age groups
