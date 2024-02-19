@@ -20,6 +20,11 @@ zcat /sc/arion/projects/CommonMind/aging/resources/topTable_combined.tsv.gz | gr
 # list of cotrasts from Jaro: https://www.synapse.org/#!Synapse:syn51114763 (google doc link or below)
 /sc/arion/projects/psychAD/NPS-AD/freeze1_rc/metadata/contrasts_for_dreamlet.Rdata
 
+####### FREEZE 15th March email from gabe #######
+
+# final_samples after removing outliers
+/sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt
+
 # age groups based on https://www.nature.com/articles/nature10523
 neonatal = 0-1years
 childhood = 2-11years
@@ -29,6 +34,7 @@ middle adulthood = 40-59years
 late adulthood = > 60years
 
 # usage
+
 pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-02-01_22_23_PB_SubID_subclass.RDS")
 colData(pb)$groups="NA"
 colData(pb)$groups[colData(pb)$Age<1]="Neonatal"
