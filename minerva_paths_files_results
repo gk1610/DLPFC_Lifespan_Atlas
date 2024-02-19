@@ -3,6 +3,19 @@
 
 /sc/arion/projects/psychAD/NPS-AD/freeze2_proc/240124_PsychAD_freeze3_AGING_clean.h5ad
 
+####### 15th March freeze email from gabe #######
+
+# final_samples after removing outliers
+/sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt
+
+# analysis from gabe link
+https://www.synapse.org/#!Synapse:syn22343687/wiki/620914
+https://hoffmg01.hpc.mssm.edu/nps_ad/analysis/freeze2/preprocess/preprocess_AGING.html
+user: roussoslab
+pw: d3g31gv03
+
+
+
 ## link from gabe for pipeline
 
 https://www.synapse.org/#!Synapse:syn22343687/wiki/620914  
@@ -20,10 +33,6 @@ zcat /sc/arion/projects/CommonMind/aging/resources/topTable_combined.tsv.gz | gr
 # list of cotrasts from Jaro: https://www.synapse.org/#!Synapse:syn51114763 (google doc link or below)
 /sc/arion/projects/psychAD/NPS-AD/freeze1_rc/metadata/contrasts_for_dreamlet.Rdata
 
-####### FREEZE 15th March email from gabe #######
-
-# final_samples after removing outliers
-/sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt
 
 # age groups based on https://www.nature.com/articles/nature10523
 neonatal = 0-1years
