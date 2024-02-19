@@ -5,16 +5,18 @@
 
 ####### 15th March freeze email from gabe #######
 
-# final_samples after removing outliers
+# final_samples after removing outliers (284)
 /sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt
+
+# Outlier analysis drops 7 samples:
+
+H1143, H826, H1708, H1405, H1061, H1866, M81548
 
 # analysis from gabe link
 https://www.synapse.org/#!Synapse:syn22343687/wiki/620914
 https://hoffmg01.hpc.mssm.edu/nps_ad/analysis/freeze2/preprocess/preprocess_AGING.html
 user: roussoslab
 pw: d3g31gv03
-
-
 
 ## link from gabe for pipeline
 
