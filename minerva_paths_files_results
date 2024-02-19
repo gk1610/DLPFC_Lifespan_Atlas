@@ -45,31 +45,37 @@ middle adulthood = 40-59years
 late adulthood = > 60years
 
 # usage
-
 pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-02-01_22_23_PB_SubID_subclass.RDS")
-colData(pb)$groups="NA"
-colData(pb)$groups[colData(pb)$Age<1]="Neonatal"
-colData(pb)$groups[colData(pb)$Age>=1 & colData(pb)$Age<12]="Childhood"
-colData(pb)$groups[colData(pb)$Age>=12 & colData(pb)$Age<20]="Adolescence"
-colData(pb)$groups[colData(pb)$Age>=20 & colData(pb)$Age<40]="Young_Adulthood"
-colData(pb)$groups[colData(pb)$Age>=40 & colData(pb)$Age<60]="Middle_Adulthood"
-colData(pb)$groups[colData(pb)$Age>=60]="Late_Adulthood"
+form = as.formula("~ Source + Sex + scale(PMI) + log(n_genes) + percent_mito + mito_genes + mito_ribo + ribo_genes")
+colData(pb)$SubID=rownames(colData(pb))
 
-table(colData(pb)$groups)
+#### keep final samples
+samples_to_keep=read.table("/sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt")
+pb_subset=pb[,colData(pb)$SubID %in% samples_to_keep$V1]
+
+colData(pb_subset)$groups="NA"
+colData(pb_subset)$groups[colData(pb_subset)$Age<1]="Neonatal"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=1 & colData(pb_subset)$Age<12]="Childhood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=12 & colData(pb_subset)$Age<20]="Adolescence"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=20 & colData(pb_subset)$Age<40]="Young_Adulthood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=40 & colData(pb_subset)$Age<60]="Middle_Adulthood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=60]="Late_Adulthood"
 
      Adolescence        Childhood   Late_Adulthood Middle_Adulthood
-              34               12               83               95
+              33               11               82               95
         Neonatal  Young_Adulthood
-              12               55
+               9               54
 
-                  Source
-groups              H  M
-  Neonatal         12  0
-  Childhood        12  0
-  Adolescence      34  0
-  Young_Adulthood  45 10
+## grouping by source
+
+                    H  M
+  Neonatal          9  0
+  Adolescence      33  0
+  Childhood        11  0
+  Young_Adulthood  44 10
   Middle_Adulthood 60 35
-  Late_Adulthood   15 68
+  Late_Adulthood   15 67
+
 
 
 # current color pallete for age groups
