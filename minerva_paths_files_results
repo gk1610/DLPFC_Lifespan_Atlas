@@ -1,8 +1,8 @@
 ### 284 donors h5ad file
 /sc/arion/projects/CommonMind/aging/input_files/freeze3.0/
 
->> stdz. libs 1000 file: ~/aging_umap.h5ad (or ~/aging_umap_age.h5ad with added age and age_groups)
->> umap (6k hvf) : ~/Aging_freeze3.0_full_std1_000.h5ad
+>> umap (6k hvf): ~/aging_umap.h5ad (or ~/aging_umap_age.h5ad with added age and age_groups)
+>> stdz. libs 1000 file: ~/Aging_freeze3.0_full_std1_000.h5ad
 >> scDRS results : ~/trait_scores80ctr
 
 ### 291 donors h5ad file
