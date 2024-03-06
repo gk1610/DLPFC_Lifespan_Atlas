@@ -196,3 +196,13 @@ scDRS_scores=fread("/sc/arion/projects/CommonMind/aging/analysis/scdrs/trait_sco
 
 ### Circadian genes with peak time from Madeline
 /sc/arion/projects/CommonMind/aging/hui/files/Sleep_pattern/2023-10-26_Circ_Genes_w_Peak_Time.xlsx
+
+
+
+#### lifespan trajectories DEGs using polynomial model poly(log2(Age + 1), df = 2)
+load("/sc/arion/projects/psychAD/aging/kiran/analysis/lifespan/subclass/best_model/lifespan_coefs_dream_results_best_model.RDATA")
+ # use lifespan_dream_results_df
+ # coef_1 is beta for coeffcient 1, coef_2 is beta for coeffcient 2
+ # adj.P.Val is joint adjusted P value for both coefs. 
+# adj.P.Val_1 and adj.P.Val_2 are respective adjusted P values for coef 1 and coef 2 individually
+
