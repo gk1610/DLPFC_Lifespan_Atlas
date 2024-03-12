@@ -5,7 +5,10 @@ CGE=IN_VIP|IN_ADARB2|IN_LAMP5_RELN|IN_LAMP5_LHX6
 “EN_L2_3_IT|EN_L3_5_IT_1|EN_L3_5_IT_2|EN_L3_5_IT_3”=“upper_IT”
 “EN_L6_IT_2|EN_L6_IT_1”=“deep_IT”
 
-
+### Cell types order according to mean pseudotime (from young to old)
+EN: EN_L6_IT_2, EN_L6B, EN_L6_IT_1, EN_L6_CT, EN_L5_6_NP, EN_L3_5_IT_3, EN_L3_5_IT_1, EN_L2_3_IT, EN_L3_5_IT_2
+IN: IN_ADARB2_RAB37, IN_LAMP5_LHX6, IN_ADARB2_SYT10, IN_LAMP5_RELN, IN_PVALB_CHC, IN_ADARB2_SV2C, IN_ADARB2_COL12A1, IN_VIP, IN_SST IN_PVALB
+AST: Astro_ADAMTSL3, Astro_PLSCR1
 
 ### 284 donors h5ad file
 /sc/arion/projects/CommonMind/aging/input_files/freeze3.0/
