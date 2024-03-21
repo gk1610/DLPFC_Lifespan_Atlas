@@ -218,3 +218,7 @@ load("/sc/arion/projects/psychAD/aging/kiran/analysis/lifespan/subclass/best_mod
  # adj.P.Val is joint adjusted P value for both coefs. 
 # adj.P.Val_1 and adj.P.Val_2 are respective adjusted P values for coef 1 and coef 2 individually
 
+
+### clusters and genes from Hui
+
+/sc/arion/projects/CommonMind/aging/hui/files/freeze3/DEGs_moran_test/modified_10000/qvalue0.05_moran200/*N_ordered_lineage_mean_peak_ks_9_cluster_*.csv
