@@ -100,7 +100,9 @@ colData(pb_subset)$groups[colData(pb_subset)$Age>=60]="Late_Adulthood"
 # current color pallete for age groups
 #previous color scheme  ###agec=  ['#FFEBCC','#FFDAB9','#FFC58C','#FFA54F','#FF8C00', '#D2691E']
 custom_order = ['Neonatal','Childhood','Adolescence','Young Adulthood','Middle Adulthood','Late Adulthood']
-ageC_all =  c('#56B4E9','#009E73','#F0E442','#0072B2', '#D55E00','#CC79A7') # new color scheme
+hex_codes = ['#E9D8A6', '#F9CFA1', '#FFCC66', '#EE9B00', '#CA6702', '#8C510A']
+
+
 
 # color pallete for analyses
 "Greens" # MAGMA by Jaro
