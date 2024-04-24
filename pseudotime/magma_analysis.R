@@ -33,7 +33,7 @@ ldscHeatmapPlotter <- function(df, plotCol="P", FDR_PER_TRAIT=F, myPadjustMethod
                              "mdd_ipsych"="MDD_2023_AlsBroad",
                              "ocd"="OCD_2018_IOCDF_GC",
                              "insomn2"="Insomnia_2019_Jansen",
-                             "alcohilism_2019"="Alcoholism_2019_SanchezRoige",
+                             "alcoholism_2019"="Alcoholism_2019_SanchezRoige",
                              "tourette"="Tourettes_2019_Yu",
                              "intel"="IQ_2018_Savage",
                              "eduAttainment"="Education_2018_Lee",
