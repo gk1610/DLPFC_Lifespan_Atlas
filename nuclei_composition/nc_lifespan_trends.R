@@ -239,10 +239,90 @@ res.vp_all=res.vp_all[,grep("log",colnames(res.vp_all))]
 colnames(res.vp_all)=c("Childhood","Young_Adulthood","Middle_Adulthood","Late_Adulthood")
 plotVarPart(res.vp_all)+scale_fill_manual(values=colors_groups_list)
 
-write.csv(res.vp1,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Childhood_varpart_all_celltypes")
-write.csv(res.vp2,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Young_Adulthood_varpart_all_celltypes")
-write.csv(res.vp3,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Middle_Adulthood_varpart_all_celltypes")
-write.csv(res.vp4,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Late_Adulthood_varpart_all_celltypes")
+write.csv(res.vp1,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Childhood_varpart_all_celltypes.csv")
+write.csv(res.vp2,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Young_Adulthood_varpart_all_celltypes.csv")
+write.csv(res.vp3,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Middle_Adulthood_varpart_all_celltypes.csv")
+write.csv(res.vp4,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Late_Adulthood_varpart_all_celltypes.csv")
+
+dev.off()
+
+
+### crumblr group specific analysis
+
+pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-02-01_22_23_PB_SubID_subclass.RDS")
+colData(pb)$SubID=rownames(colData(pb))
+
+#### keep final samples
+samples_to_keep=read.table("/sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt")
+pb_subset=pb[,colData(pb)$SubID %in% samples_to_keep$V1]
+
+colData(pb_subset)$groups="NA"
+colData(pb_subset)$groups[colData(pb_subset)$Age<1]="Childhood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=1 & colData(pb_subset)$Age<12]="Childhood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=12 & colData(pb_subset)$Age<20]="Childhood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=20 & colData(pb_subset)$Age<40]="Young_Adulthood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=40 & colData(pb_subset)$Age<60]="Middle_Adulthood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=60]="Late_Adulthood"
+colData(pb_subset)$scaled_age=scale(colData(pb_subset)$Age)
+
+pdf("/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/group_specific_dream_all_celltypes.pdf")
+
+tab_scaled_age_list=list()
+ct = 1
+
+for (group in groups_list) {
+
+pb_subset_final=pb_subset[,colData(pb_subset)$groups==group]
+metadata_df=as.data.frame(colData(pb_subset_final))
+cell_counts = cellCounts(pb_subset_final)
+cell_counts=cell_counts[,colnames(cell_counts)!="EN_L5_ET"]
+cobj = crumblr(cell_counts)
+
+bestModel=" ~ log2(Age+1) + scale(PMI) + Sex"
+form = as.formula(bestModel)
+fit = dream(cobj, form, metadata_df)
+fit = eBayes(fit) 
+head(fit$coefficients)
+
+hcl = buildClusterTreeFromPB(pb_subset_final, assays = grep("EN_L5_ET",assayNames(pb_subset_final),invert=TRUE,value=TRUE))
+
+res1 = treeTest(fit, cobj, hcl, coef="log2(Age + 1)")
+fig.tree = plotTreeTest(res1) + theme(legend.position="none")+xlim(0, 15)
+tab_scaled_age = topTable(fit, "log2(Age + 1)", number=Inf, sort.by="none")
+tab_scaled_age$celltype = factor(rownames(tab_scaled_age), rev(subclass_order))
+tab_scaled_age$se = with(tab_scaled_age, logFC/ t)
+
+fig.logFC = ggplot(tab_scaled_age, aes(celltype, logFC,color=celltype)) +
+  geom_hline(yintercept=0, linetype="dashed", color="grey50") + 
+  geom_errorbar(aes(ymin=logFC - 1.96*se, ymax=logFC + 1.96*se), width=0) +
+  geom_point(data=tab_scaled_age,aes(celltype, logFC,color=celltype,size=-log10(adj.P.Val))) +
+  coord_flip() +
+  theme_classic() +
+  xlab('') +
+  theme(aspect.ratio=3.65,axis.text.y = element_blank())+scale_color_manual(values=subclass_color_map)
+ fig.logFC %>% insert_left(fig.tree)  #%>% insert_right(fig.vp)
+
+ print(fig.logFC %>% insert_left(fig.tree))  #%>% insert_right(fig.vp)
+
+tab_scaled_age$groups=group
+tab_scaled_age_list[[ct]]=tab_scaled_age
+ct = ct + 1
+
+}
+
+tab_scaled_age_list1=do.call(rbind,tab_scaled_age_list)
+tab_scaled_age_list1$groups=factor(tab_scaled_age_list1$groups,groups_list)
+tab_scaled_age_list1$celltype = factor(tab_scaled_age_list1$celltype, rev(subclass_order))
+tab_scaled_age_list1$mylabel=""
+tab_scaled_age_list1$mylabel[tab_scaled_age_list1$P.Value<.05]="*"
+tab_scaled_age_list1$mylabel[tab_scaled_age_list1$adj.P.Val<.05]="#"
+
+ggplot(tab_scaled_age_list1, aes(groups, celltype, fill=logFC, label=mylabel)) +
+  geom_tile() +
+  geom_text(vjust=1, hjust=0.5) +
+  theme_classic() + 
+  theme(aspect.ratio=3, axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  scale_fill_gradient2(low="blue", mid="white", high="red") 
 
 dev.off()
 
