@@ -136,3 +136,115 @@ dev.off()
 write.csv(tab_scaled_age,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/wls_with_res.csv")
 
 
+
+#### group specific analysis
+
+setwd("/sc/arion/projects/CommonMind/aging/analysis/crumblr")
+
+pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-02-01_22_23_PB_SubID_subclass.RDS")
+colData(pb)$SubID=rownames(colData(pb))
+
+#### keep final samples
+samples_to_keep=read.table("/sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt")
+pb_subset=pb[,colData(pb)$SubID %in% samples_to_keep$V1]
+
+colData(pb_subset)$groups="NA"
+colData(pb_subset)$groups[colData(pb_subset)$Age<1]="Childhood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=1 & colData(pb_subset)$Age<12]="Childhood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=12 & colData(pb_subset)$Age<20]="Childhood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=20 & colData(pb_subset)$Age<40]="Young_Adulthood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=40 & colData(pb_subset)$Age<60]="Middle_Adulthood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=60]="Late_Adulthood"
+colData(pb_subset)$scaled_age=scale(colData(pb_subset)$Age)
+
+#### varpart analysis by age groups
+
+pdf("/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/group_specific_varpart_all_celltypes.pdf")
+
+pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Childhood"]
+colData(pb_subset_final)$scaled_age=scale(colData(pb_subset_final)$Age)
+cobj = crumblr(cellCounts(pb_subset_final))
+bestModel=" ~ scale(PMI) + Sex"
+form = as.formula(bestModel)
+fit = dream(cobj, form, colData(pb_subset_final))
+residuals_mat=fit$residuals
+bestModel=" ~ log2(Age+1)"
+form=as.formula(bestModel)
+res.vp1 = fitExtractVarPartModel(residuals_mat, form, colData(pb_subset_final))
+res.vp1=res.vp1[grep("EN_L5_ET",rownames(res.vp1),invert=TRUE),]
+res.vp1=as.data.frame(res.vp1)
+g1=plotPercentBars(res.vp1[order(res.vp1[,1],decreasing=TRUE),])+ggtitle("Childhood")+scale_fill_manual(values=c("#009E73","gray"))
+
+
+celltype_order=rownames(res.vp1[order(res.vp1[,1],decreasing=TRUE),])
+
+pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Young_Adulthood"]
+colData(pb_subset_final)$scaled_age=scale(colData(pb_subset_final)$Age)
+cobj = crumblr(cellCounts(pb_subset_final))
+bestModel=" ~ scale(PMI) + Sex + Source"
+form = as.formula(bestModel)
+fit = dream(cobj, form, colData(pb_subset_final))
+residuals_mat=fit$residuals
+bestModel=" ~ log2(Age+1)"
+form=as.formula(bestModel)
+res.vp2 = fitExtractVarPartModel(residuals_mat, form, colData(pb_subset_final))
+res.vp2=res.vp2[grep("EN_L5_ET|EN_NF",rownames(res.vp2),invert=TRUE),]
+res.vp2=as.data.frame(res.vp2)
+g2=plotPercentBars(res.vp2[match(celltype_order,rownames(res.vp2)),])+ggtitle("Young_Adulthood")+scale_fill_manual(values=c("#0072B2","gray"))
+
+
+pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Middle_Adulthood"]
+colData(pb_subset_final)$scaled_age=scale(colData(pb_subset_final)$Age)
+cobj = crumblr(cellCounts(pb_subset_final))
+bestModel=" ~ scale(PMI) + Sex + Source"
+form = as.formula(bestModel)
+fit = dream(cobj, form, colData(pb_subset_final))
+residuals_mat=fit$residuals
+bestModel=" ~ log2(Age+1)"
+form=as.formula(bestModel)
+res.vp3 = fitExtractVarPartModel(residuals_mat, form, colData(pb_subset_final))
+res.vp3=res.vp3[grep("EN_L5_ET|EN_NF",rownames(res.vp3),invert=TRUE),]
+res.vp3=as.data.frame(res.vp3)
+g3=plotPercentBars(res.vp3[match(celltype_order,rownames(res.vp3)),])+ggtitle("Middle_Adulthood")+scale_fill_manual(values=c("#D55E00","gray"))
+#g3
+
+
+pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Late_Adulthood"]
+colData(pb_subset_final)$scaled_age=scale(colData(pb_subset_final)$Age)
+cobj = crumblr(cellCounts(pb_subset_final))
+bestModel=" ~ scale(PMI) + Sex + Source"
+form = as.formula(bestModel)
+fit = dream(cobj, form, colData(pb_subset_final))
+residuals_mat=fit$residuals
+bestModel=" ~ log2(Age+1)"
+form=as.formula(bestModel)
+res.vp4 = fitExtractVarPartModel(residuals_mat, form, colData(pb_subset_final))
+res.vp4=res.vp4[grep("EN_L5_ET|EN_NF",rownames(res.vp4),invert=TRUE),]
+res.vp4=as.data.frame(res.vp4)
+g4=plotPercentBars(res.vp4[match(celltype_order,rownames(res.vp4)),])+ggtitle("Late_Adulthood")+scale_fill_manual(values=c("#CC79A7","gray"))
+
+
+res.vp1$celltype=rownames(res.vp1)
+res.vp2$celltype=rownames(res.vp2)
+res.vp3$celltype=rownames(res.vp3)
+res.vp4$celltype=rownames(res.vp4)
+
+res.vp1$groups="Childhood"
+res.vp2$groups="Young_Adulthood"
+res.vp3$groups="Middle_Adulthood"
+res.vp4$groups="Late_Adulthood"
+
+res.vp_all=cbind(res.vp1[,c("log2(Age + 1)","groups","celltype")],res.vp2[,c("log2(Age + 1)","groups","celltype")],res.vp3[,c("log2(Age + 1)","groups","celltype")],res.vp4[,c("log2(Age + 1)","groups","celltype")])
+res.vp_all=res.vp_all[,grep("log",colnames(res.vp_all))]
+colnames(res.vp_all)=c("Childhood","Young_Adulthood","Middle_Adulthood","Late_Adulthood")
+plotVarPart(res.vp_all)+scale_fill_manual(values=colors_groups_list)
+
+write.csv(res.vp1,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Childhood_varpart_all_celltypes")
+write.csv(res.vp2,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Young_Adulthood_varpart_all_celltypes")
+write.csv(res.vp3,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Middle_Adulthood_varpart_all_celltypes")
+write.csv(res.vp4,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Late_Adulthood_varpart_all_celltypes")
+
+dev.off()
+
+
+
