@@ -65,3 +65,74 @@ BIC_list_plot$celltype=factor(BIC_list_plot$celltype,levels=subclass_order)
 library(gridExtra)
 
 save(BIC_list_plot,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/lifespan_trajectories_all_celltypes_BIC_models.RDATA")
+
+
+
+#### Whole life span crumblr analysis
+
+setwd("/sc/arion/projects/CommonMind/aging/analysis/crumblr")
+
+pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-02-01_22_23_PB_SubID_subclass.RDS")
+colData(pb)$SubID=rownames(colData(pb))
+
+#### keep final samples
+samples_to_keep=read.table("/sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt")
+pb_subset=pb[,colData(pb)$SubID %in% samples_to_keep$V1]
+
+colData(pb_subset)$groups="NA"
+colData(pb_subset)$groups[colData(pb_subset)$Age<1]="Childhood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=1 & colData(pb_subset)$Age<12]="Childhood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=12 & colData(pb_subset)$Age<20]="Childhood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=20 & colData(pb_subset)$Age<40]="Young_Adulthood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=40 & colData(pb_subset)$Age<60]="Middle_Adulthood"
+colData(pb_subset)$groups[colData(pb_subset)$Age>=60]="Late_Adulthood"
+colData(pb_subset)$scaled_age=scale(colData(pb_subset)$Age)
+
+metadata_df=as.data.frame(colData(pb_subset))
+cell_counts=cellCounts(pb_subset)
+cell_counts=cell_counts[,colnames(cell_counts)!="EN_L5_ET"]
+cobj = crumblr(cell_counts)
+
+bestModel=" ~ scale(PMI) + Sex + Source"
+form = as.formula(bestModel)
+fit = dream(cobj, form, metadata_df)
+res_mat=residuals(fit)
+
+bestModel=" ~ log2(Age + 1)"
+form = as.formula(bestModel)
+fit = dream(res_mat, form, metadata_df)
+fit = eBayes(fit) 
+head(fit$coefficients)
+
+df_table=topTable(fit, coef='log2(Age + 1)', number=Inf) %>%   
+  select(logFC, AveExpr, t, P.Value, adj.P.Val)
+head(df_table)
+
+hcl = buildClusterTreeFromPB(pb_subset, assays = grep("EN_L5_ET",assayNames(pb),invert=TRUE,value=TRUE))
+cobj$E=res_mat
+res1 = treeTest(fit, cobj, hcl, coef="log2(Age + 1)")
+fig.tree = plotTreeTest(res1) + theme(legend.position="none")+xlim(0, 15)
+tab_scaled_age = topTable(fit, "log2(Age + 1)", number=Inf, sort.by="none")
+tab_scaled_age$celltype =factor(rownames(tab_scaled_age), rev(subclass_order))
+tab_scaled_age$se = with(tab_scaled_age, logFC/ t)
+fig.tree$data$label=factor(fig.tree$data$label,levels=rev(subclass_order))
+
+pdf("/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/wls_with_res.pdf")
+
+fig.logFC = ggplot(tab_scaled_age, aes(celltype, logFC,color=celltype)) +
+  geom_hline(yintercept=0, linetype="dashed", color="grey50") + 
+  geom_errorbar(aes(ymin=logFC - 1.96*se, ymax=logFC + 1.96*se), width=0) +
+  geom_point(data=tab_scaled_age,aes(celltype, logFC,color=celltype,size=-log10(adj.P.Val))) +
+  coord_flip() +
+  theme_classic() +
+  xlab('') +
+  theme(aspect.ratio=3.65,axis.text.y = element_blank())+scale_color_manual(values=subclass_color_map)
+ fig.logFC %>% insert_left(fig.tree)  #%>% insert_right(fig.vp)
+
+plotCorrMatrix(cor(t(res_mat)))
+
+dev.off()
+
+write.csv(tab_scaled_age,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/wls_with_res.csv")
+
+
