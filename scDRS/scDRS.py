@@ -43,7 +43,7 @@ for trait in dict_you_want:
         gene_list=gene_list,
         gene_weight=gene_weights,
         ctrl_match_key="mean_var",
-        n_ctrl=80,
+        n_ctrl=200,
         weight_opt="vs",
         return_ctrl_raw_score=False,
         return_ctrl_norm_score=True,
