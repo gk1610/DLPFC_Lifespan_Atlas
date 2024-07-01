@@ -17,7 +17,8 @@ AST: Astro_ADAMTSL3, Astro_PLSCR1
 
 >> umap (6k hvf): ~/aging_umap.h5ad (or ~/aging_umap_age.h5ad with added age and age_groups)
 >> stdz. libs 1000 file: ~/Aging_freeze3.0_full_std1_000.h5ad
->> scDRS results : ~/trait_scores80ctr
+>> scDRS results : ~/trait_scores80ctr/scDRS_assoc_score_subclass_merged.csv
+>> VariancePartition: ~/Variance_AgeSex_meanmed_2024_07_01.csv
 
 ### 291 donors h5ad file
 /sc/arion/projects/psychAD/NPS-AD/freeze2_rc/h5ad_final/AGING_2024-02-01_22_23.h5ad
