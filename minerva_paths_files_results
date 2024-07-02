@@ -1,3 +1,11 @@
+ [1] "EN_L6_CT"      "EN_L5_6_NP"    "EN_L6B"        "EN_L3_5_IT_1"
+ [5] "EN_L3_5_IT_2"  "EN_L3_5_IT_3"  "EN_L2_3_IT"    "EN_L6_IT_1"
+ [9] "EN_L6_IT_2"    "IN_LAMP5_RELN" "IN_LAMP5_LHX6" "IN_ADARB2"
+[13] "IN_VIP"        "IN_PVALB_CHC"  "IN_PVALB"      "IN_SST"
+[17] "Astro"         "Oligo"         "OPC"           "Micro"
+[21] "Adaptive"      "PVM"           "SMC"           "VLMC"
+[25] "Endo"          "PC"
+
 https://www.synapse.org/#!Synapse:syn52396927/files/
 
 MGE=IN_SST|IN_PVALB|IN_PVALB_CHC
