@@ -70,6 +70,17 @@ res_mash[[i]]=run_mash(res.dl, coef=coef_list[i])
 
 save(res_mash,aic,bic,n_samples,metadata,res.dl,form,file=paste0("/sc/arion/projects/psychAD/aging/kiran/analysis/lifespan/subclass/all_models/",brain_bank,"_",model_name,".RDATA"))
 
+files=list.files("/sc/arion/projects/psychAD/aging/kiran/analysis/lifespan/subclass/all_models/",pattern="*.RDATA",full.names=TRUE)
+files=files[grep("BIC_all_models.RDATA",files,invert=TRUE)]
+
+BIC_list=list()
+for ( ii in (1:length(files))) {
+load(files[ii])
+df=lapply(1:length(res.dl),function(i) data.frame("BIC"=res.dl[[i]]$BIC,"celltype"=names(res.dl)[i],"genes"=names(res.dl[[i]]$BIC)))
+BIC_list[[ii]]=do.call(rbind,df)
+BIC_list[[ii]]$model_type=sub(".*_all_*","",gsub(".RDATA","",basename(files[ii])))
+}
+save(BIC_list,file="/sc/arion/projects/psychAD/aging/kiran/analysis/lifespan/subclass/all_models/BIC_all_models.RDATA")
 
 
   
