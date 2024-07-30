@@ -49,8 +49,7 @@ res.dl = dreamlet(res.proc, form)
 metadata=as.data.frame(colData(res.proc))
 
 res_mash=run_mash(res.dl, coef="scaled_age")
-res.dvar <- diffVar(res.dl)
 
-save(res_mash,res.dvar,metadata,res.dl,input_groups,form,file=paste0("/sc/arion/projects/psychAD/aging/kiran/analysis/dreamlet/four_groups/subclass/four_groups_specific_",input_groups,".RDATA"))
+save(res_mash,metadata,res.dl,input_groups,form,file=paste0("/sc/arion/projects/psychAD/aging/kiran/analysis/dreamlet/four_groups/subclass/four_groups_specific_",input_groups,".RDATA"))
 
 
