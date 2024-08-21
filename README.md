@@ -2,7 +2,7 @@
 [PsychAD Lifespan PFC] A lifespan transcriptomic atlas of the human prefrontal cortex at single-cell resolution
 
 # Dataset
-Supplementary data and tables are available at [Synapse DOI Link](https://doi.org/10.7303/syn52396927)
+Supplementary data and tables are available at [Synapse DOI Link](https://www.synapse.org/)
 
 # Citation
 Yang et. al., A lifespan transcriptomic atlas of the human prefrontal cortex at single-cell resolution
