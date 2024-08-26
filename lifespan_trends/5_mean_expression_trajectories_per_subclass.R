@@ -1,24 +1,35 @@
-.libPaths(c("/sc/arion/projects/psychAD/aging/kiran/RLib_4_3.2",.libPaths()))
+suppressPackageStartupMessages({
 library(zellkonverter)
+library(basilisk)
 library(dreamlet)
-library(variancePartition)
-library(HDF5Array)
-library(dplyr)
-source("/sc/arion/work/girdhk01/scripts/chipseq_files.R")
-source('/sc/arion/projects/roussp01a/pengfei/hicchip/scripts/hic_helper.R')
-source("/sc/arion/work/girdhk01/scripts/myscripts/CRD/CMC_SV_help.R")
-source("/sc/arion/work/girdhk01/scripts/myscripts/CRD/TRH_help_functions.R")
-source("/sc/arion/work/girdhk01/scripts/myscripts/CRD/HiC_pengfei.R")
-source("/sc/arion/work/girdhk01/scripts/myscripts/chiq_test.R")
+library(crumblr)
+library(Seurat)
+library(SingleCellExperiment)
+library(dreamlet)
+library(zenith)
+library(DelayedArray)
+library(GSEABase)
+library(scater)
+library(tidyverse)
+library(ggplot2)
+library(cowplot) 
+library(org.Hs.eg.db)
+library(R.utils)
+library(RColorBrewer)
+library(aplot)
+library(ggtree)
+library(mgcv)
+library(splines)
+library(knitr)
+library(rmarkdown)
+library(gridExtra)
+library(aplot)
+library(ggtree)})
 
-args = commandArgs(trailingOnly=TRUE)
-celltypes=args[1]
+best_model_list=list("poly_with_two_df_log_Age"= "~ 0 + poly(log2(Age+1),df=2)")
 
-average_model_list=list("poly_with_two_df_log_Age"= "~ 0 + poly(log2(Age+1),df=2)")
-
-
-load("/sc/arion/projects/psychAD/aging/kiran/analysis/lifespan/subclass/best_model/lifespan_coefs_dream_results_best_model.RDATA")
-load(paste0("/sc/arion/projects/psychAD/aging/kiran/analysis/residuals/residuals_subid_subclass_all.RDATA"))
+load(paste0("lifespan_trends/best_model/lifespan_coefs_dream_results_best_model.RDATA"))
+load(paste0("lifespan_trends/residuals/residuals_subclass.RDATA"))
 metadata$SubID=rownames(metadata)
 
 input_gene=lifespan_dream_coefs_df$ID[lifespan_dream_coefs_df$celltype == celltypes]
@@ -56,10 +67,5 @@ names(aging_dream_trajectories_scaled)=input_gene
 
 aging_dream_trajectories_mat=do.call(rbind,aging_dream_trajectories)
 aging_dream_trajectories_scaled_mat=do.call(rbind,aging_dream_trajectories_scaled)
-res_mat_subset=res_mat[[which(names(res_mat) %in% celltypes)]]
-res_mat=res_mat_subset
-
-load(paste0("/sc/arion/projects/psychAD/aging/kiran/analysis/residuals/residuals_subid_subclass_all.RDATA"))
-metadata$SubID=rownames(metadata)
 
 save(metadata,res_mat,aging_dream_trajectories_scaled_mat,aging_dream_trajectories_mat,file=paste0("/sc/arion/projects/psychAD/aging/kiran/analysis/lifespan/subclass/shinyapp/average_trajectory_",celltypes,".RDATA"))
