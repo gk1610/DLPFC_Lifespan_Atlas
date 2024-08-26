@@ -32,6 +32,11 @@ subclass_order=c("EN_L6_CT", "EN_L5_6_NP", "EN_L6B", "EN_L3_5_IT_1", "EN_L3_5_IT
     "EN_L6_IT_2","IN_LAMP5_RELN", "IN_LAMP5_LHX6","IN_ADARB2","IN_VIP","IN_PVALB_CHC","IN_PVALB", "IN_SST",
     "Astro","Oligo","OPC","Micro","Adaptive", "PVM","SMC","VLMC", "Endo","PC")
 
+groups_list=c("Developmental","Young_Adulthood","Middle_Adulthood","Late_Adulthood")
+colors_groups_list=c("#F9CFA1","#EE9B00","#CA6702","#8C510A")
+names(colors_groups_list)=groups_list
+
+
 ##### part 1 Trajectories estimation starts here ###############
 
 data_dir="/sc/arion/projects/psychAD/aging/kiran/syanpse_testrun" 
@@ -257,7 +262,6 @@ write.csv(tab_scaled_age,file=paste0(data_dir,"wls_with_res.csv"))
 
 # measure the variance explained by age groups in nuclei composition
 
-pdf("/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/group_specific_varpart_all_celltypes.pdf")
 
 pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Developmental"]
 cobj = crumblr(cellCounts(pb_subset_final))
@@ -310,7 +314,6 @@ res.vp4 = fitExtractVarPartModel(residuals_mat, form, colData(pb_subset_final))
 res.vp4=res.vp4[grep("EN_L5_ET",rownames(res.vp4),invert=TRUE),]
 res.vp4=as.data.frame(res.vp4)
 
-
 res.vp1$celltype=rownames(res.vp1)
 res.vp2$celltype=rownames(res.vp2)
 res.vp3$celltype=rownames(res.vp3)
@@ -324,30 +327,15 @@ res.vp4$groups="Late_Adulthood"
 res.vp_all=cbind(res.vp1[,c("log2(Age + 1)","groups","celltype")],res.vp2[,c("log2(Age + 1)","groups","celltype")],res.vp3[,c("log2(Age + 1)","groups","celltype")],res.vp4[,c("log2(Age + 1)","groups","celltype")])
 res.vp_all=res.vp_all[,grep("log",colnames(res.vp_all))]
 colnames(res.vp_all)=c("Developmental","Young_Adulthood","Middle_Adulthood","Late_Adulthood")
+
+## plot Extended Data Figure 2d
+
+pdf(paste0(data_dir,"/group_specific_varpart_all_celltypes.pdf"))
+
 plotVarPart(res.vp_all)+scale_fill_manual(values=colors_groups_list)
 
 dev.off()
 
-
-### crumblr group specific analysis
-
-pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-02-01_22_23_PB_SubID_subclass.RDS")
-colData(pb)$SubID=rownames(colData(pb))
-
-#### keep final samples
-samples_to_keep=read.table("/sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt")
-pb_subset=pb[,colData(pb)$SubID %in% samples_to_keep$V1]
-
-colData(pb_subset)$groups="NA"
-colData(pb_subset)$groups[colData(pb_subset)$Age<1]="Childhood"
-colData(pb_subset)$groups[colData(pb_subset)$Age>=1 & colData(pb_subset)$Age<12]="Childhood"
-colData(pb_subset)$groups[colData(pb_subset)$Age>=12 & colData(pb_subset)$Age<20]="Childhood"
-colData(pb_subset)$groups[colData(pb_subset)$Age>=20 & colData(pb_subset)$Age<40]="Young_Adulthood"
-colData(pb_subset)$groups[colData(pb_subset)$Age>=40 & colData(pb_subset)$Age<60]="Middle_Adulthood"
-colData(pb_subset)$groups[colData(pb_subset)$Age>=60]="Late_Adulthood"
-colData(pb_subset)$scaled_age=scale(colData(pb_subset)$Age)
-
-pdf("/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/group_specific_dream_all_celltypes.pdf")
 
 tab_scaled_age_list=list()
 ct = 1
@@ -367,7 +355,6 @@ fit = eBayes(fit)
 head(fit$coefficients)
 
 hcl = buildClusterTreeFromPB(pb_subset_final, assays = grep("EN_L5_ET",assayNames(pb_subset_final),invert=TRUE,value=TRUE))
-
 res1 = treeTest(fit, cobj, hcl, coef="log2(Age + 1)")
 fig.tree = plotTreeTest(res1) + theme(legend.position="none")+xlim(0, 15)
 tab_scaled_age = topTable(fit, "log2(Age + 1)", number=Inf, sort.by="none")
@@ -384,7 +371,7 @@ fig.logFC = ggplot(tab_scaled_age, aes(celltype, logFC,color=celltype)) +
   theme(aspect.ratio=3.65,axis.text.y = element_blank())+scale_color_manual(values=subclass_color_map)
  fig.logFC %>% insert_left(fig.tree)  #%>% insert_right(fig.vp)
 
- print(fig.logFC %>% insert_left(fig.tree))  #%>% insert_right(fig.vp)
+print(fig.logFC %>% insert_left(fig.tree))  #%>% insert_right(fig.vp)
 
 tab_scaled_age$groups=group
 tab_scaled_age_list[[ct]]=tab_scaled_age
@@ -398,6 +385,10 @@ tab_scaled_age_list1$celltype = factor(tab_scaled_age_list1$celltype, rev(subcla
 tab_scaled_age_list1$mylabel=""
 tab_scaled_age_list1$mylabel[tab_scaled_age_list1$P.Value<.05]="*"
 tab_scaled_age_list1$mylabel[tab_scaled_age_list1$adj.P.Val<.05]="#"
+
+## plot Extended Data Figure 2e
+
+pdf(paste0(data_dir,"group_specific_dream_all_celltypes.pdf"))
 
 ggplot(tab_scaled_age_list1, aes(groups, celltype, fill=logFC, label=mylabel)) +
   geom_tile() +
