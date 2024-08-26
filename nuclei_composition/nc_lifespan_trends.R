@@ -1,4 +1,5 @@
 devtools::install_github("DiseaseNeurogenomics/crumblr")
+devtools::install_github("DiseaseNeurogenomics/variancePartition")
 
 suppressPackageStartupMessages({
 library(zellkonverter)
