@@ -45,6 +45,7 @@ g1+theme(axis.title= element_text(color="black", size=sz),axis.text = element_te
 ## code starts here 
 
 data_dir="nuclei_composition" 
+dir.create(data_dir)
 syn62064718=synGet(entity="syn62064718",downloadLocation=data_dir)
 pb=readRDS(paste0(data_dir,"/lifespan_pseudobulk.rds"))
 colData(pb)$SubID=rownames(colData(pb))
