@@ -111,7 +111,7 @@ BIC_list[[ii]]$model_type=gsub("_nl.RDATA","",basename(files[ii]))
 save(BIC_list,file=paste0(data_dir,"/BIC_all_models.RDATA"))
 
 
-# BIC
+# plot S5a
 
 BIC_df=do.call(rbind,BIC_list)
 df=BIC_df %>% group_by(model_type,celltype) %>% summarize(mean_BIC=mean(BIC))
