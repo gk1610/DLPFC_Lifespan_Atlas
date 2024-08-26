@@ -83,7 +83,7 @@ res.dl = dreamlet(res.proc, form)
 ## mashr object for shared genes analysis
 res_mash=run_mash(res.dl, coef="scaled_age") 
 
-save(res_mash,res.dl,form,file=paste0("data_dir/",groups_list[kk],".RDATA"))
+save(res_mash,res.dl,form,file=paste0(data_dir,"/",groups_list[kk],".RDATA"))
 
 }
 
