@@ -36,9 +36,6 @@ groups_list=c("Developmental","Young_Adulthood","Middle_Adulthood","Late_Adultho
 colors_groups_list=c("#F9CFA1","#EE9B00","#CA6702","#8C510A")
 names(colors_groups_list)=groups_list
 
-
-##### part 1 Trajectories estimation starts here ###############
-
 data_dir="/sc/arion/projects/psychAD/aging/kiran/syanpse_testrun" 
 syn62064718=synGet(entity="syn62064718",downloadLocation=data_dir)
 pb=readRDS(paste0(data_dir,"/lifespan_pseudobulk.rds"))
