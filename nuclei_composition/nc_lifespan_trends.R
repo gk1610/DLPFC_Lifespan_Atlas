@@ -116,7 +116,7 @@ dev.off()
 
 ## plot Fig.S2b
 
-### get all log model coefs
+### kmeans clustering of coefs of age from log model
 
 crumblr_coefs_list=list()
 crumblr_fitted_line_list=list()
@@ -159,19 +159,10 @@ g1+geom_hline(yintercept=0,linetype="dashed")+theme(legend.position="top")
 
 dev.off()
 
-
-crumblr_coefs_list1$cluster=kmeans_result$cluster
 crumblr_fitted_line_list_cluster=merge(crumblr_fitted_line_list1,crumblr_coefs_list1,by="celltype")
-
-cmap=read.csv("/sc/arion/projects/CommonMind/aging/resources/230921_PsychAD_color_palette.csv")
-cmap=cmap[cmap$category=="subclass",]
-cmap=as.data.frame(cmap)
-subclass_color_map=c(cmap$color_hex,"gray")
-names(subclass_color_map)=c(cmap$name,"NS")
-
 crumblr_fitted_line_list_cluster$celltype=factor(crumblr_fitted_line_list_cluster$celltype,level=subclass_order)
-crumblr_fitted_line_list_cluster$cluster=factor(crumblr_fitted_line_list_cluster$cluster,levels=c(c(2,1)),labels=c("log_increasing","log_decreasing"))
 
+### make plot of whole lifespan trajectories of nuclei composition 
 
 ## plot Extended Data Figure 2a
 
@@ -211,7 +202,7 @@ print(g1)
 dev.off()
 
 
-#### Whole lifespan trends Extended Data Figure 2c
+#### quantification of coefficent of Age using crumblr limma based analysis as shown in Extended Data Figure 2c
 
 bestModel=" ~ log2(Age + 1)"
 form = as.formula(bestModel)
@@ -238,7 +229,7 @@ fig.tree$data$label=factor(fig.tree$data$label,levels=rev(subclass_order))
 
 ## plot Extended Data Figure 2c
 
-pdf(paste0(data_dir,"wls_with_res.pdf"))
+pdf(paste0(data_dir,"/wls_with_res.pdf"))
 
 fig.logFC = ggplot(tab_scaled_age, aes(celltype, logFC,color=celltype)) +
   geom_hline(yintercept=0, linetype="dashed", color="grey50") + 
@@ -257,8 +248,7 @@ write.csv(tab_scaled_age,file=paste0(data_dir,"wls_with_res.csv"))
 
 #### age group specific analysis ####
 
-# measure the variance explained by age groups in nuclei composition
-
+# measure the variance explained by log2(Age+1) for each age group in nuclei composition
 
 pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Developmental"]
 cobj = crumblr(cellCounts(pb_subset_final))
@@ -333,9 +323,7 @@ plotVarPart(res.vp_all)+scale_fill_manual(values=colors_groups_list)
 
 dev.off()
 
-
-### here we quantify the variance explained by log2(Age+1) for each group using limma-based crumblr analysis
-
+### here we quantify the coefficient of log2(Age+1) for each group using limma-based crumblr analysis
 
 tab_scaled_age_list=list()
 ct = 1
