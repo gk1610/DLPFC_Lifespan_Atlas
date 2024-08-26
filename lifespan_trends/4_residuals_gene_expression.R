@@ -51,5 +51,5 @@ res.proc = processAssays(pb,as.formula(form))
 res.dl = dreamlet(res.proc, as.formula(form))
 res_mat = residuals(res.dl,res.proc)
 
-save(res_mat,form,file=paste0(data_dir,"residuals_subclass.RDATA"))
+save(res_mat,form,file=paste0(data_dir,"/residuals_subclass.RDATA"))
 
