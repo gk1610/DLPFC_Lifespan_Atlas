@@ -1,4 +1,4 @@
-devtools::install_github("DiseaseNeurogenomics/crumblr")
+devtools::install_github("DiseaseNeurogenomics/dreamlet")
 
 suppressPackageStartupMessages({
 library(zellkonverter)
