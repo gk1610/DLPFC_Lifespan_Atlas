@@ -36,7 +36,15 @@ groups_list=c("Developmental","Young_Adulthood","Middle_Adulthood","Late_Adultho
 colors_groups_list=c("#F9CFA1","#EE9B00","#CA6702","#8C510A")
 names(colors_groups_list)=groups_list
 
-data_dir="/sc/arion/projects/psychAD/aging/kiran/syanpse_testrun" 
+good_plot=function(g1,sz,rot){
+g1=g1+theme_classic()+theme(axis.title= element_text(color="black", size=sz),axis.text = element_text(color="black", size=sz),axis.text.x=element_text(angle=rot,hjust=1,vjust=1))
+g1=g1+theme(legend.position="right")+theme(strip.text=element_text(face="bold",color="black"),strip.background=element_rect(fill="#eeeeee",color="#eeeeee"))
+g1+theme(axis.title= element_text(color="black", size=sz),axis.text = element_text(color="black", size=sz))+theme(aspect.ratio=1)+theme(panel.border = element_rect(size = 1, color = "black", fill = NA))
+}
+
+## code starts here 
+
+data_dir="nuclei_composition" 
 syn62064718=synGet(entity="syn62064718",downloadLocation=data_dir)
 pb=readRDS(paste0(data_dir,"/lifespan_pseudobulk.rds"))
 colData(pb)$SubID=rownames(colData(pb))
@@ -193,7 +201,7 @@ g1=ggplot(df_order) +
                  geom_point(aes(x=Age, y=value),alpha=0.55, color="black") + geom_point(aes(x=Age, y=value),alpha=0.55, color="black") + geom_line(aes(x=Age, y=log_model),alpha=0.55, color="blue")+
                  theme_minimal() +ggtitle(paste0("log_fit_",cell_types))
 
-g1=good_plot(g1,10,0)+theme(legend.position="top")+xlab("")+ylab("Residualized_counts")
+g1=g1+theme(legend.position="top")+xlab("")+ylab("Residualized_counts")
 
 print(g1)
 
