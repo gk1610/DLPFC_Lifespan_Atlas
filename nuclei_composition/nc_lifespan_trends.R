@@ -28,6 +28,10 @@ library(gridExtra)
 library(aplot)
 library(ggtree)})
 
+subclass_order=c("EN_L6_CT", "EN_L5_6_NP", "EN_L6B", "EN_L3_5_IT_1", "EN_L3_5_IT_2", "EN_L3_5_IT_3", "EN_L2_3_IT","EN_L6_IT_1",
+    "EN_L6_IT_2","IN_LAMP5_RELN", "IN_LAMP5_LHX6","IN_ADARB2","IN_VIP","IN_PVALB_CHC","IN_PVALB", "IN_SST",
+    "Astro","Oligo","OPC","Micro","Adaptive", "PVM","SMC","VLMC", "Endo","PC")
+
 ##### part 1 Trajectories estimation starts here ###############
 
 data_dir="/sc/arion/projects/psychAD/aging/kiran/syanpse_testrun" 
@@ -95,12 +99,117 @@ BIC_list1$diff_BIC=BIC_list1$log_BIC_model-BIC_list1$linear_BIC_model
 BIC_list_plot=melt(BIC_list1,id="celltype")
 BIC_list_plot$celltype=factor(BIC_list_plot$celltype,levels=subclass_order)
 
-## this object was used to plot Fig.S2a
 
 save(BIC_list_plot,file=paste0(data_dir,"lifespan_trajectories_all_celltypes_BIC_models.RDATA"))
 
+## plot Fig.S2a
 
-#### Whole lifespan trends Extended Data Figure 2a
+pdf(paste0(data_dir,"/lifespan_trajectories_all_celltypes_BIC_models.pdf"))
+
+g1=ggplot(subset(BIC_list_plot,variable=="diff_BIC"),aes(x=celltype, y=value,fill=factor(celltype))) + geom_bar(stat="identity",position="dodge2") + theme_bw()
+g1+theme(legend.position="top")+xlab("")+ylab("BIC(log-linear)")
+
+dev.off()
+
+
+## plot Fig.S2b
+
+### get all log model coefs
+
+crumblr_coefs_list=list()
+crumblr_fitted_line_list=list()
+ct = 1
+
+for (cell_types in subclass_order) {
+
+cobj_metadata$value=cobj_metadata[,cell_types]
+df_order=cobj_metadata[order(cobj_metadata$Age),]
+df_order$log_model=fitted(lm(value~log2(Age+1),data=df_order))
+df_order$samples=df_order$SubID
+
+crumblr_fitted_line_list[[ct]]=df_order[,c(cell_types,"samples","value","Age","log_model")]
+colnames(crumblr_fitted_line_list[[ct]])[1]="cell_composition"
+crumblr_fitted_line_list[[ct]]$celltype=cell_types
+crumblr_coefs_list[[ct]]=data.frame(celltype=cell_types)
+crumblr_coefs_list[[ct]]$log_estimate=summary(lm(value~log2(Age+1),data=df_order))[[4]][2,1]
+crumblr_coefs_list[[ct]]$log_pvalue=summary(lm(value~log2(Age+1),data=df_order))[[4]][2,4]
+
+ct = ct + 1
+}
+
+
+crumblr_coefs_list1=do.call(rbind,crumblr_coefs_list)
+rownames(crumblr_coefs_list1)=crumblr_coefs_list1$celltype
+
+crumblr_fitted_line_list1=do.call(rbind,crumblr_fitted_line_list)
+rownames(crumblr_fitted_line_list1)=NULL
+
+crumblr_coefs_list1$adj_pvalue=p.adjust(crumblr_coefs_list1$log_pvalue,method="fdr")
+
+k <- 2  # number of clusters
+kmeans_result <- kmeans(crumblr_coefs_list1$log_estimate, centers = k)
+crumblr_coefs_list1$cluster=kmeans_result$cluster
+
+pdf(paste0(data_dir,"/kmeans_results_lifespan_trajectories_all_celltypes.pdf"))
+
+g1=ggplot(crumblr_coefs_list1,aes(factor(cluster),log_estimate,color=factor(celltype)))+geom_point()
+g1+geom_hline(yintercept=0,linetype="dashed")+theme(legend.position="top")
+
+dev.off()
+
+
+crumblr_coefs_list1$cluster=kmeans_result$cluster
+crumblr_fitted_line_list_cluster=merge(crumblr_fitted_line_list1,crumblr_coefs_list1,by="celltype")
+
+cmap=read.csv("/sc/arion/projects/CommonMind/aging/resources/230921_PsychAD_color_palette.csv")
+cmap=cmap[cmap$category=="subclass",]
+cmap=as.data.frame(cmap)
+subclass_color_map=c(cmap$color_hex,"gray")
+names(subclass_color_map)=c(cmap$name,"NS")
+
+crumblr_fitted_line_list_cluster$celltype=factor(crumblr_fitted_line_list_cluster$celltype,level=subclass_order)
+crumblr_fitted_line_list_cluster$cluster=factor(crumblr_fitted_line_list_cluster$cluster,levels=c(c(2,1)),labels=c("log_increasing","log_decreasing"))
+
+
+## plot Extended Data Figure 2a
+
+pdf(paste0(data_dir,"/lifespan_trajectories_all_celltypes.pdf"))
+
+g1=ggplot(subset(crumblr_fitted_line_list_cluster,adj_pvalue<.05)) + geom_line(aes(x=Age, y=log_model,group=celltype,color=celltype))+
+                 facet_wrap(~cluster,ncol=3)+scale_color_manual(values=subclass_color_map)+theme_bw()+theme(legend.position="top")
+
+g1=good_plot(g1,10,0)+theme(legend.position="top")+xlab("Age")+ylab("Residualized_counts")+geom_vline(xintercept=c(20,40,60),linetype="dashed")
+
+print(g1)
+
+dev.off()
+
+
+## plot Extended Data Figure 2b
+
+pdf(paste0(data_dir,"/lifespan_trajectories_all_celltypes_log_models.pdf"))
+
+for (cell_types in subclass_order) {
+
+cobj_metadata$value=cobj_metadata[,cell_types]
+df_order=cobj_metadata[order(cobj_metadata$Age),]
+df_order$log_model=fitted(lm(value~log2(Age+1),data=df_order))
+df_order=as.data.frame(df_order)
+
+g1=ggplot(df_order) +
+                 geom_point(aes(x=Age, y=value),alpha=0.55, color="black") + geom_point(aes(x=Age, y=value),alpha=0.55, color="black") + geom_line(aes(x=Age, y=log_model),alpha=0.55, color="blue")+
+                 theme_minimal() +ggtitle(paste0("log_fit_",cell_types))
+
+g1=good_plot(g1,10,0)+theme(legend.position="top")+xlab("")+ylab("Residualized_counts")
+
+print(g1)
+
+}
+
+dev.off()
+
+
+#### Whole lifespan trends Extended Data Figure 2c
 
 bestModel=" ~ log2(Age + 1)"
 form = as.formula(bestModel)
@@ -124,6 +233,9 @@ tab_scaled_age$celltype =factor(rownames(tab_scaled_age), rev(subclass_order))
 tab_scaled_age$se = with(tab_scaled_age, logFC/ t)
 fig.tree$data$label=factor(fig.tree$data$label,levels=rev(subclass_order))
 
+
+## plot Extended Data Figure 2c
+
 pdf(paste0(data_dir,"wls_with_res.pdf"))
 
 fig.logFC = ggplot(tab_scaled_age, aes(celltype, logFC,color=celltype)) +
@@ -141,33 +253,13 @@ dev.off()
 write.csv(tab_scaled_age,file=paste0(data_dir,"wls_with_res.csv"))
 
 
+#### age group specific analysis ####
 
-#### group specific analysis
-
-setwd("/sc/arion/projects/CommonMind/aging/analysis/crumblr")
-
-pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-02-01_22_23_PB_SubID_subclass.RDS")
-colData(pb)$SubID=rownames(colData(pb))
-
-#### keep final samples
-samples_to_keep=read.table("/sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt")
-pb_subset=pb[,colData(pb)$SubID %in% samples_to_keep$V1]
-
-colData(pb_subset)$groups="NA"
-colData(pb_subset)$groups[colData(pb_subset)$Age<1]="Childhood"
-colData(pb_subset)$groups[colData(pb_subset)$Age>=1 & colData(pb_subset)$Age<12]="Childhood"
-colData(pb_subset)$groups[colData(pb_subset)$Age>=12 & colData(pb_subset)$Age<20]="Childhood"
-colData(pb_subset)$groups[colData(pb_subset)$Age>=20 & colData(pb_subset)$Age<40]="Young_Adulthood"
-colData(pb_subset)$groups[colData(pb_subset)$Age>=40 & colData(pb_subset)$Age<60]="Middle_Adulthood"
-colData(pb_subset)$groups[colData(pb_subset)$Age>=60]="Late_Adulthood"
-colData(pb_subset)$scaled_age=scale(colData(pb_subset)$Age)
-
-#### varpart analysis by age groups
+# measure the variance explained by age groups in nuclei composition
 
 pdf("/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/group_specific_varpart_all_celltypes.pdf")
 
-pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Childhood"]
-colData(pb_subset_final)$scaled_age=scale(colData(pb_subset_final)$Age)
+pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Developmental"]
 cobj = crumblr(cellCounts(pb_subset_final))
 bestModel=" ~ scale(PMI) + Sex"
 form = as.formula(bestModel)
@@ -178,10 +270,6 @@ form=as.formula(bestModel)
 res.vp1 = fitExtractVarPartModel(residuals_mat, form, colData(pb_subset_final))
 res.vp1=res.vp1[grep("EN_L5_ET",rownames(res.vp1),invert=TRUE),]
 res.vp1=as.data.frame(res.vp1)
-g1=plotPercentBars(res.vp1[order(res.vp1[,1],decreasing=TRUE),])+ggtitle("Childhood")+scale_fill_manual(values=c("#009E73","gray"))
-
-
-celltype_order=rownames(res.vp1[order(res.vp1[,1],decreasing=TRUE),])
 
 pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Young_Adulthood"]
 colData(pb_subset_final)$scaled_age=scale(colData(pb_subset_final)$Age)
@@ -193,10 +281,8 @@ residuals_mat=fit$residuals
 bestModel=" ~ log2(Age+1)"
 form=as.formula(bestModel)
 res.vp2 = fitExtractVarPartModel(residuals_mat, form, colData(pb_subset_final))
-res.vp2=res.vp2[grep("EN_L5_ET|EN_NF",rownames(res.vp2),invert=TRUE),]
+res.vp2=res.vp2[grep("EN_L5_ET",rownames(res.vp2),invert=TRUE),]
 res.vp2=as.data.frame(res.vp2)
-g2=plotPercentBars(res.vp2[match(celltype_order,rownames(res.vp2)),])+ggtitle("Young_Adulthood")+scale_fill_manual(values=c("#0072B2","gray"))
-
 
 pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Middle_Adulthood"]
 colData(pb_subset_final)$scaled_age=scale(colData(pb_subset_final)$Age)
@@ -208,11 +294,8 @@ residuals_mat=fit$residuals
 bestModel=" ~ log2(Age+1)"
 form=as.formula(bestModel)
 res.vp3 = fitExtractVarPartModel(residuals_mat, form, colData(pb_subset_final))
-res.vp3=res.vp3[grep("EN_L5_ET|EN_NF",rownames(res.vp3),invert=TRUE),]
+res.vp3=res.vp3[grep("EN_L5_ET",rownames(res.vp3),invert=TRUE),]
 res.vp3=as.data.frame(res.vp3)
-g3=plotPercentBars(res.vp3[match(celltype_order,rownames(res.vp3)),])+ggtitle("Middle_Adulthood")+scale_fill_manual(values=c("#D55E00","gray"))
-#g3
-
 
 pb_subset_final=pb_subset[,colData(pb_subset)$groups=="Late_Adulthood"]
 colData(pb_subset_final)$scaled_age=scale(colData(pb_subset_final)$Age)
@@ -224,9 +307,8 @@ residuals_mat=fit$residuals
 bestModel=" ~ log2(Age+1)"
 form=as.formula(bestModel)
 res.vp4 = fitExtractVarPartModel(residuals_mat, form, colData(pb_subset_final))
-res.vp4=res.vp4[grep("EN_L5_ET|EN_NF",rownames(res.vp4),invert=TRUE),]
+res.vp4=res.vp4[grep("EN_L5_ET",rownames(res.vp4),invert=TRUE),]
 res.vp4=as.data.frame(res.vp4)
-g4=plotPercentBars(res.vp4[match(celltype_order,rownames(res.vp4)),])+ggtitle("Late_Adulthood")+scale_fill_manual(values=c("#CC79A7","gray"))
 
 
 res.vp1$celltype=rownames(res.vp1)
@@ -234,20 +316,15 @@ res.vp2$celltype=rownames(res.vp2)
 res.vp3$celltype=rownames(res.vp3)
 res.vp4$celltype=rownames(res.vp4)
 
-res.vp1$groups="Childhood"
+res.vp1$groups="Developmental"
 res.vp2$groups="Young_Adulthood"
 res.vp3$groups="Middle_Adulthood"
 res.vp4$groups="Late_Adulthood"
 
 res.vp_all=cbind(res.vp1[,c("log2(Age + 1)","groups","celltype")],res.vp2[,c("log2(Age + 1)","groups","celltype")],res.vp3[,c("log2(Age + 1)","groups","celltype")],res.vp4[,c("log2(Age + 1)","groups","celltype")])
 res.vp_all=res.vp_all[,grep("log",colnames(res.vp_all))]
-colnames(res.vp_all)=c("Childhood","Young_Adulthood","Middle_Adulthood","Late_Adulthood")
+colnames(res.vp_all)=c("Developmental","Young_Adulthood","Middle_Adulthood","Late_Adulthood")
 plotVarPart(res.vp_all)+scale_fill_manual(values=colors_groups_list)
-
-write.csv(res.vp1,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Childhood_varpart_all_celltypes.csv")
-write.csv(res.vp2,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Young_Adulthood_varpart_all_celltypes.csv")
-write.csv(res.vp3,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Middle_Adulthood_varpart_all_celltypes.csv")
-write.csv(res.vp4,file="/sc/arion/projects/psychAD/aging/kiran/analysis/crumblr/lifespan/Late_Adulthood_varpart_all_celltypes.csv")
 
 dev.off()
 
@@ -330,6 +407,9 @@ ggplot(tab_scaled_age_list1, aes(groups, celltype, fill=logFC, label=mylabel)) +
   scale_fill_gradient2(low="blue", mid="white", high="red") 
 
 dev.off()
+
+
+
 
 
 
