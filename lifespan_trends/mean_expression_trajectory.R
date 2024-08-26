@@ -1,50 +1,55 @@
-.libPaths(c("/sc/arion/projects/psychAD/aging/kiran/RLib_4_3.2",.libPaths()))
+suppressPackageStartupMessages({
 library(zellkonverter)
+library(basilisk)
 library(dreamlet)
-library(variancePartition)
-library(HDF5Array)
-library(dplyr)
-source("/sc/arion/work/girdhk01/scripts/chipseq_files.R")
-source('/sc/arion/projects/roussp01a/pengfei/hicchip/scripts/hic_helper.R')
-source("/sc/arion/work/girdhk01/scripts/myscripts/CRD/CMC_SV_help.R")
-source("/sc/arion/work/girdhk01/scripts/myscripts/CRD/TRH_help_functions.R")
-source("/sc/arion/work/girdhk01/scripts/myscripts/CRD/HiC_pengfei.R")
-source("/sc/arion/work/girdhk01/scripts/myscripts/chiq_test.R")
+library(crumblr)
+library(Seurat)
+library(SingleCellExperiment)
+library(dreamlet)
+library(zenith)
+library(DelayedArray)
+library(GSEABase)
+library(scater)
+library(tidyverse)
+library(ggplot2)
+library(cowplot) 
+library(org.Hs.eg.db)
+library(R.utils)
+library(RColorBrewer)
+library(aplot)
+library(ggtree)
+library(mgcv)
+library(splines)
+library(knitr)
+library(rmarkdown)
+library(gridExtra)
+library(aplot)
+library(ggtree)})
 
-args = commandArgs(trailingOnly=TRUE)
-input_file=args[1]
+best_model_list=list("poly_with_two_df_log_Age"= "~ 0 + poly(log2(Age+1),df=2)")
+
+load(paste0("lifespan_trends/best_model/lifespan_coefs_dream_results_best_model.RDATA"))
+lifespan_dream_results_df$celltype_ID=paste0(lifespan_dream_results_df$celltype,"_",lifespan_dream_results_df$ID)
+
+clusters_df=read.csv("lifespan_trends/best_model/clustered_data_nclust10.csv)
+clusters_df$cluster=as.numeric(as.character(clusters_df$cluster))
+clusters_df$ID=sub(".*_", "", clusters_df$celltype_ID)
+
+clusters_lifespan_dream_coefs_df=merge(lifespan_dream_results_df,clusters_df[,c("celltype_ID","cluster")],by='celltype_ID')
+clusters_lifespan_dream_coefs_df=clusters_lifespan_dream_coefs_df[clusters_lifespan_dream_coefs_df$adj.P.Val<.05,]
+
+
+load(paste0("lifespan_trends/residuals/residuals_subclass.RDATA"))
+metadata$SubID=rownames(metadata)
 
 subclass_order=c("EN_L6_CT", "EN_L5_6_NP", "EN_L6B", "EN_L3_5_IT_1", "EN_L3_5_IT_2", "EN_L3_5_IT_3", "EN_L2_3_IT","EN_L6_IT_1",
     "EN_L6_IT_2","IN_LAMP5_RELN", "IN_LAMP5_LHX6","IN_ADARB2","IN_PVALB_CHC", "IN_PVALB", "IN_SST", "IN_VIP",
     "Astro","Oligo","OPC","Micro","Adaptive", "PVM","SMC","VLMC", "Endo","PC")
 
-cmap=read.csv("/sc/arion/projects/CommonMind/aging/resources/230921_PsychAD_color_palette.csv")
-cmap=cmap[cmap$category=="subclass",]
-cmap=as.data.frame(cmap)
-subclass_color_map=c(cmap$color_hex,"gray")
-names(subclass_color_map)=c(cmap$name,"NS")
-
-
 average_model_list=list("poly_with_two_df_log_Age"= "~ 0 + poly(log2(Age+1),df=2)")
 
-
-load("/sc/arion/projects/psychAD/aging/kiran/analysis/lifespan/subclass/best_model/lifespan_coefs_dream_results_best_model.RDATA")
-lifespan_dream_results_df$celltype_ID=paste0(lifespan_dream_results_df$celltype,"_",lifespan_dream_results_df$ID)
-
-clusters_df=read.csv(input_file)
-clusters_df$cluster=as.numeric(as.character(clusters_df$cluster))
-clusters_df$ID=sub(".*_", "", clusters_df$celltype_ID)
-
-
-clusters_lifespan_dream_coefs_df=merge(lifespan_dream_results_df,clusters_df[,c("celltype_ID","cluster")],by='celltype_ID')
-clusters_lifespan_dream_coefs_df=clusters_lifespan_dream_coefs_df[clusters_lifespan_dream_coefs_df$adj.P.Val<.05,]
-
 aging_average_expression=list()
-
 ct = 1
-
-load(paste0("/sc/arion/projects/psychAD/aging/kiran/analysis/residuals/residuals_subid_subclass_all.RDATA"))
-metadata$SubID=rownames(metadata)
 
 file_name=gsub('.csv','.pdf',input_file)
 
@@ -105,30 +110,6 @@ print(good_plot(g1,12,0)+ggtitle(paste0("cluster_",mm))+scale_color_manual(value
 }
 
 aging_average_expression_df=do.call(rbind,aging_average_expression)
-
-subclass_order=c("EN_NF","EN_L5_ET", "EN_L6_CT", "EN_L5_6_NP", "EN_L6B", "EN_L3_5_IT_1", "EN_L3_5_IT_2", "EN_L3_5_IT_3", "EN_L2_3_IT","EN_L6_IT_1",
-    "EN_L6_IT_2","IN_LAMP5_RELN", "IN_LAMP5_LHX6","IN_ADARB2","IN_PVALB_CHC", "IN_PVALB", "IN_SST", "IN_VIP",
-    "Astro","Oligo","OPC","Micro","Immune", "PVM","SMC","VLMC", "Endo","PC")
-
-cmap=read.csv("/sc/arion/projects/CommonMind/aging/resources/230921_PsychAD_color_palette.csv")
-cmap=cmap[cmap$category=="subclass",]
-cmap=as.data.frame(cmap)
-subclass_color_map=c(cmap$color_hex,"gray")
-names(subclass_color_map)=c(cmap$name,"NS")
-
-library(ggh4x )
-pallete1=(brewer.pal(8,"Reds"))
-myPalette = colorRampPalette(pallete1)
-strip <- strip_themed(background_x = elem_list_rect(fill = myPalette(10)))
-
-clusters_lifespan_dream_results_df=merge(lifespan_dream_results_df,clusters_df[,c("celltype_ID","cluster")],by='celltype_ID')
-lifespan_summary_per_cluster=as.data.frame(clusters_lifespan_dream_results_df %>% dplyr::group_by(cluster,celltype) %>% dplyr::summarize(n_DGE_genes=uniqueN(ID[adj.P.Val<.05]),tot_genes=uniqueN(ID)))
-lifespan_summary_per_cluster$celltype=factor(lifespan_summary_per_cluster$celltype,level=subclass_order)
-lifespan_summary_per_cluster_tot=lifespan_summary_per_cluster %>% dplyr::group_by(cluster) %>% dplyr::summarize(DGE_genes=sum(n_DGE_genes),tot_genes=sum(tot_genes))
-lifespan_summary_per_cluster_tot$prop=lifespan_summary_per_cluster_tot$DGE_genes/lifespan_summary_per_cluster_tot$tot_genes
-cluster_order=rev(lifespan_summary_per_cluster_tot$cluster[order(lifespan_summary_per_cluster_tot$prop,decreasing=TRUE)])
-lifespan_summary_per_cluster$cluster=factor(lifespan_summary_per_cluster$cluster,levels=cluster_order)
-
 aging_average_expression_df_summary=aging_average_expression_df %>% dplyr::group_by(cluster,SubID) %>% dplyr::summarize(mean_fitted_dream_line=mean(fitted_dream_line_scaled),Age=mean(Age))
 aging_average_expression_df_summary$cluster=factor(aging_average_expression_df_summary$cluster,levels=cluster_order)
 
