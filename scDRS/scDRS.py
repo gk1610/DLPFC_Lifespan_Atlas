@@ -31,11 +31,14 @@ os.makedirs(data_dir, exist_ok=True)
 # Download the entity to the specified directory
 syn62147251 = syn.get(entity="syn62147251", downloadLocation=data_dir)
 
+# Load the synapse intity
 adata = sc.read_h5ad(syn62147251)
 adata
 
+# Preprocess ann data object via scdrs
 scdrs.preprocess(adata, n_mean_bin=20, n_var_bin=20, copy=False)
 
+# Load custom geneset
 dict_gs = scdrs.util.load_gs('./custom_geneset.gs',
                             src_species="human",dst_species="human",to_intersect=adata.var_names)
 dict_gs.keys()
@@ -43,9 +46,10 @@ dict_gs.keys()
 # If you want specific gwas studies only
 dict_you_want = dict_gs
 
-# assign connectivities slot
+# Assign connectivities slot
 adata.obsp['connectivities'] = adata.obsp['W_pca_regressed_harmony']
 
+# Calculate per cell/nuclei scDRS core
 dict_df_score = dict()
 for trait in dict_you_want:
     gene_list, gene_weights = dict_gs[trait]
@@ -58,9 +62,9 @@ for trait in dict_you_want:
         weight_opt="vs",
         return_ctrl_raw_score=False,
         return_ctrl_norm_score=True,
-        verbose=False,
-    )
+        verbose=False)
 
+# Perform downstream analysis - calculate disease association z-score
 for trait in dict_df_score:
     df_stats = scdrs.method.downstream_group_analysis(
         adata=adata,
