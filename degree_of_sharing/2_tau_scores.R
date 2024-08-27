@@ -1,21 +1,27 @@
-pb=readRDS("/sc/arion/projects/psychAD/NPS-AD/freeze2_rc/pseudobulk/AGING_2024-02-01_22_23_PB_SubID_subclass.RDS")
+
+data_dir="degree_of_sharing" 
+syn62064718=synGet(entity="syn62064718",downloadLocation=data_dir)
+pb=readRDS(paste0(data_dir,"/lifespan_pseudobulk.rds"))
 colData(pb)$SubID=rownames(colData(pb))
 
-#### keep final samples
-samples_to_keep=read.table("/sc/arion/projects/CommonMind/aging/resources/AGING_2024-02-01_22_23_processAssays_SubID_subclass.txt")
-pb_subset=pb[,colData(pb)$SubID %in% samples_to_keep$V1]
-pb_subset=pb_subset[,colData(pb_subset)$Age<20]
+## age groups assignment
+colData(pb)$groups="NA"
+colData(pb)$groups[colData(pb)$Age<20]="Developmental"
+colData(pb)$groups[colData(pb)$Age>=20 & colData(pb)$Age<40]="Young_Adulthood"
+colData(pb)$groups[colData(pb)$Age>=40 & colData(pb)$Age<60]="Middle_Adulthood"
+colData(pb)$groups[colData(pb)$Age>=60]="Late_Adulthood"
 
-# Stack assays for joint analysis
-pb.stack=stackAssays(pb_subset, assays = grep("^EN",subclass_order,invert=FALSE,value=TRUE))
 
+pb_subset=pb[,colData(pb)$groups=="Developmental"]
+
+# Stack EN assays to estimate Tau scores 
+pb.stack=stackAssays(pb, assays = grep("^EN",subclass_order,invert=FALSE,value=TRUE))
 geneExpr <- assay(pb.stack, 1)
 rownames(geneExpr) <- rownames(pb.stack)
 geneExpr_keep=geneExpr[rownames(geneExpr) %in% PC_genes$gene_name,]
 
-### find counts per million
+### convert counts to cpm
 idx <- which(colSums(geneExpr_keep, useNames = TRUE) <5)
-
 if (length(idx)>0){
 geneExpr_keep <- geneExpr_keep[, -idx]
 }
@@ -61,53 +67,9 @@ result <- geneExpr_cluster_cpm_by_donors_mat %>%
     select(genes, Tau.Score, Status) %>%
     left_join(geneExpr_cluster_cpm_by_donors_mat, ., by="genes")  # had to use dot since new columns are wanted at the end
 
-library(e1071)
-result_clusters_centers=result %>%
-    select_if(is.numeric) %>%
-    select(-Tau.Score) %>%
-    cmeans(2,iter.max = 100,verbose = FALSE,dist = "euclidean",method = "cmeans",m=2,rate.par = e-10) %>%
-    .[["centers"]] %>% as_tibble()
-
- result_clusters_centers=result_clusters_centers %<>%
-    rownames_to_column %>%                     # these three lines are just for transposing the data
-    tidyr::gather(var, value, -rowname) %>%    # instead of t(), we preferred
-    spread(rowname, value) %>%                 # tidyverse approach
-    rename(celltypes=var, lower=`1`, upper=`2`)
-
- geneExpr_cluster_threshold <- geneExpr_cluster_cpm_by_donors_mat %>%
-    tidyr::gather(celltypes, expression, colnames(select_if(.,is.numeric))) %>%
-    left_join(result_clusters_centers, by="celltypes")%>%
-    mutate(clustermean = (lower + upper) /2) %>%    # TODO shouldnt we checking upper level, not the mean?
-    group_by(celltypes) %>%
-    summarize(upper_cluster=mean(upper),          # mean not necessary, just collapsing the repeating data
-              lower_cluster=mean(lower),          # mean not necessary, just collapsing the repeating data
-              average_cluster=mean(clustermean),  # mean not necessary, just collapsing the repeating data
-              no_nonzero=sum(expression > 0),
-              no_elements=sum(expression > clustermean),
-              threshold_ratio=no_elements/no_nonzero)
-
-  threshhold_ratios <- geneExpr_cluster_threshold$threshold_ratio
-  numcells <- length(threshhold_ratios)
-  regressionResult<-lm(threshhold_ratios~seq(numcells))
-  coeffs <- coefficients(regressionResult)
-  optimizedTreshold<-mean(seq(numcells)*coeffs[2]+coeffs[1])
-  tresholdVal<-qnorm(0.9999)- abs(qnorm(optimizedTreshold))
-  result_thresh <- tibble(optimizedTreshold = optimizedTreshold, tresholdVal = tresholdVal)
-  threshold <- result_thresh$tresholdVal
-
-  final_result=geneExpr_cluster_cpm_by_donors_mat %>%
-    tidyr::gather(celltypes, expression, colnames(select_if(.,is.numeric))) %>%   # gather only numeric columns
-    mutate_if(is.numeric, list(~ ifelse(. < 1, 1, .))) %>%  # if there's any expression less than 1, make it 1
-    group_by(genes) %>%
-    mutate(stdDev = sd(expression),
-           maxVal = mean(expression),
-           cutoff = maxVal-stdDev*threshold) %>%
-    dplyr::filter(expression > cutoff) %>%
-    ungroup() %>%
-    select(genes,celltypes,expression,cutoff)
+save(result,file=paste0(data_dir,"/tauscore_stacked_EN_data_developmental.RDATA"))
 
 
-save(num_of_cells,final_result,geneExpr_cluster_threshold,result_clusters_centers,result,geneExpr_cluster_cpm_by_donors_mat,geneExpr_cluster_cpm,file="/sc/arion/projects/psychAD/aging/kiran/analysis/lifespan/tauscore_stacked_EN_data_Childhood.RDATA")
 
 
 
