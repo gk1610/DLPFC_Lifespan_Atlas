@@ -13,7 +13,6 @@ IN <- c("IN_LAMP5_RELN", "IN_LAMP5_LHX6","IN_ADARB2","IN_PVALB_CHC", "IN_PVALB",
 cell_class_list=list("EN"=EN,"IN"=IN,"glias"=glias)
 
 ### get mashr results from age_associated_transcriptomic_changes directory
-
 setwd("age_associated_transcriptomic_changes")
 files=list.files(pattern="*RDATA")
 
@@ -69,10 +68,15 @@ ct = ct + 1
 genes_significance_cells_counts_df=do.call(rbind,genes_significance_cells_counts)
 
 combined_prob_age_groups_df <- do.call(rbind,combined_prob)
+
+## merging of composite probability with dreamlet results
 combined_prob_age_groups_ncells_df <- merge(combined_prob_age_groups_df, genes_significance_cells_counts_df[,c("group_cell_class_gene","ncells","ncells_aDEG","ncells_aDEG_per_class")], by = "group_cell_class_gene", all.x = TRUE)
 combined_prob_age_groups_ncells_df$ncells[is.na(combined_prob_age_groups_ncells_df$ncells)] <- 0
 combined_prob_age_groups_ncells_df$ncells_aDEG[is.na(combined_prob_age_groups_ncells_df$ncells_aDEG)] <- 0
 
+### to get shared genes in Figure 3
+combined_prob_age_groups_shared_genes=combined_prob_age_groups_ncells_df[combined_prob_age_groups_ncells_df$prob>0.9 & combined_prob_age_groups_ncells_df$ncells>=2,]
 
+save(combined_prob_age_groups_shared_genes,file=paste0(data_dir,"/degree_of_sharing.RDATA"))
 
 
