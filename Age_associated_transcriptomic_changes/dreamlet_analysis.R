@@ -151,7 +151,7 @@ pdf("all_groups_aDEGs_nsamples_bar_plot.pdf")
 
 g1=ggplot(data =df,aes(x = age_groups, y =  nDGE, fill=age_groups)) + 
   geom_bar(stat="identity")+scale_fill_manual(values=colors_groups_list)+geom_text(data =df,aes(x = age_groups, y =  nDGE,label=nDGE),vjust=-0.1, hjust=0.1,angle=0)
-g1=good_plot(g1,12,40)+theme(legend.position="none")+scale_y_continuous(expand=c(0,0),limit=c(0,max(df$nDGE)+500))+xlab("")+theme(aspect.ratio=1.25)+ylab("No. of samples")
+g1=good_plot(g1,12,40)+theme(legend.position="none")+scale_y_continuous(expand=c(0,0),limit=c(0,max(df$nDGE)+500))+xlab("")+theme(aspect.ratio=1.25)+ylab("# aDEGs")
 
 df=data.frame("Developmental"=53,"Young_Adulthood"=54,"Middle_Adulthood"=95,"Late_Adulthood"=82)
 df=melt(df)
@@ -160,7 +160,7 @@ df=as.data.frame(df)
 
 g2=ggplot(data =df,aes(x = age_groups, y =  value, fill=age_groups)) + 
   geom_bar(stat="identity")+scale_fill_manual(values=colors_groups_list)+geom_text(data =df,aes(x = age_groups, y =  value,label=value),vjust=-0.1, hjust=0.1,angle=0)
-g2=good_plot(g2,12,40)+theme(legend.position="none")+scale_y_continuous(expand=c(0,0),limit=c(0,max(df$value)+10))+xlab("")+theme(aspect.ratio=1.25)
+g2=good_plot(g2,12,40)+theme(legend.position="none")+scale_y_continuous(expand=c(0,0),limit=c(0,max(df$value)+10))+xlab("")+theme(aspect.ratio=1.25)+ylab("No. of samples")
 
 grid.arrange(g2,g1,ncol=2)
 
@@ -178,21 +178,21 @@ g1=ggplot(data =subset(four_groups_cell_specific_melted_summary,age_groups=="Dev
                         fill=variable)) + 
   geom_bar(stat="identity")+scale_fill_manual(values=rev(c("#3C54A5","#EF4243")))+geom_text(data =subset(four_groups_cell_specific_melted_summary,age_groups=="Developmental"),aes(x = n_DGE_genes, y =  factor(celltype),label=n_DGE_genes),vjust=-0.1, hjust=0.1,angle=0)
 g1=good_plot(g1,12,0)+theme(legend.position="none")+scale_x_continuous(expand=c(0,0),limit=c(0,max(df$n_DGE_genes)+100))+xlab("")+theme(aspect.ratio=2.95)#+ylim(c(0,500))
-g1=g1+facet_wrap(~group,ncol=1,scale="free_x")
+g1=g1+facet_wrap(~age_groups,ncol=1,scale="free_x")
 
 df=subset(four_groups_cell_specific_melted_summary,age_groups=="Late_Adulthood")
 g2=ggplot(data =subset(four_groups_cell_specific_melted_summary,age_groups=="Late_Adulthood"),aes(x = value, y =  factor(celltype), 
                         fill=variable)) + 
   geom_bar(stat="identity")+scale_fill_manual(values=rev(c("#3C54A5","#EF4243")))+geom_text(data =subset(four_groups_cell_specific_melted_summary,age_groups=="Late_Adulthood"),aes(x = n_DGE_genes, y =  factor(celltype),label=n_DGE_genes),vjust=-0.1, hjust=0.1,angle=0)
 g2=good_plot(g2,12,0)+theme(legend.position="none")+scale_x_continuous(expand=c(0,0),limit=c(0,max(df$n_DGE_genes)+100))+ylab("No of DEGs")+xlab("")+theme(aspect.ratio=2.95)#+ylim(c(0,500))
-g2=g2+facet_wrap(~group,ncol=2,scale="free_x")
+g2=g2+facet_wrap(~age_groups,ncol=2,scale="free_x")
 grid.arrange(g1,g2,ncol=2)
 
 g1=ggplot(data =subset(four_groups_cell_specific_melted_summary,age_groups=="Young_Adulthood"),aes(y = value, x =  factor(celltype), 
                         fill=variable)) + 
   geom_bar(stat="identity")+scale_fill_manual(values=rev(c("#3C54A5","#EF4243")))+geom_text(data =subset(four_groups_cell_specific_melted_summary,age_groups=="Young_Adulthood"),aes(y = n_DGE_genes, x =  factor(celltype),label=n_DGE_genes),hjust=-0.2, vjust=0.1,angle=90)
 g1=good_plot(g1,12,45)+theme(legend.position="top")+theme(aspect.ratio=0.25)+scale_y_continuous(expand=c(0,0),limit=c(0,max(four_groups_cell_specific_melted_summary$value)+1500))+ylab("No of DEGs")+xlab("")+theme(aspect.ratio=0.15)#+ylim(c(0,500))
-g1=g1+facet_wrap(~group,ncol=1,scale="free_y")
+g1=g1+facet_wrap(~age_groups,ncol=1,scale="free_y")
 
 pallete1=(brewer.pal(8,"Reds"))
 myPalette = colorRampPalette(pallete1)
@@ -200,7 +200,7 @@ g2=ggplot(data =subset(four_groups_cell_specific_melted_summary,age_groups=="Mid
                         fill=variable)) + 
   geom_bar(stat="identity")+scale_fill_manual(values=rev(c("#3C54A5","#EF4243")))+geom_text(data =subset(four_groups_cell_specific_melted_summary,age_groups=="Middle_Adulthood"),aes(y = n_DGE_genes, x =  factor(celltype),label=n_DGE_genes),hjust=-0.3, vjust=0.1,angle=90)
 g2=good_plot(g2,12,45)+theme(legend.position="top")+theme(aspect.ratio=0.25)+scale_y_continuous(expand=c(0,0),limit=c(0,max(four_groups_cell_specific_melted_summary$value)+10))+ylab("No of DEGs")+xlab("")+theme(aspect.ratio=0.15)#+ylim(c(0,500))
-g2=g2+facet_wrap(~group,ncol=1,scale="free_y")
+g2=g2+facet_wrap(~age_groups,ncol=1,scale="free_y")
 
 grid.arrange(g1,g2,ncol=1)
 
