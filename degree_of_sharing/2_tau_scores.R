@@ -52,6 +52,7 @@ rownames(geneExpr) <- rownames(pb.stack)
 geneExpr_keep=geneExpr[rownames(geneExpr) %in% PC_genes$gene_name,]
 
 ### convert counts to cpm
+
 idx <- which(colSums(geneExpr_keep, useNames = TRUE) <5)
 if (length(idx)>0){
 geneExpr_keep <- geneExpr_keep[, -idx]
