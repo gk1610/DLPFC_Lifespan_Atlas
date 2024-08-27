@@ -73,7 +73,7 @@ args_flavor = 'cell_ranger'
 args_batch = 'Source'
 args_n_top_genes = 6000 # was None
 
-### HVF
+### HVF calculation
 hvg = pge.scanpy_hvf_h5ad(h5ad_file=args_input, flavor=args_flavor, batch_key=args_batch,
                           n_top_genes=args_n_top_genes, min_mean=0.0125, max_mean=3,
                           min_disp=0.5, protein_coding=True, autosome=True)
@@ -118,12 +118,12 @@ print('Using %i components for PCA' % npc)
 
 from harmony import harmonize
 
-### harmony/kNN Donghoon's setup
+### harmony/kNN
 pg.regress_out(data, attrs=['n_counts','percent_mito','cycle_diff'])
 pg.run_harmony(data, batch=args_batch, rep='pca_regressed', max_iter_harmony=20, n_comps=npc)
 pg.neighbors(data, rep='pca_regressed_harmony', use_cache=False, dist='l2', K=100, n_comps=npc)
 
-### umap
+### calculate umap
 pg.umap(data, rep='pca_regressed_harmony', n_neighbors=args_n_neighbors, rep_ncomps=npc)
 
 ### save
