@@ -43,10 +43,10 @@ colData(pb)$groups[colData(pb)$Age>=40 & colData(pb)$Age<60]="Middle_Adulthood"
 colData(pb)$groups[colData(pb)$Age>=60]="Late_Adulthood"
 
 
-pb_subset=pb[,colData(pb)$groups=="Developmental"]
+pb_subset=pb[,colData(pb)$groups=="Developmental"] # change here for age group
 
 # Stack EN assays to estimate Tau scores 
-pb.stack=stackAssays(pb, assays = grep("^EN",subclass_order,invert=FALSE,value=TRUE))
+pb.stack=stackAssays(pb, assays = grep("^EN",subclass_order,invert=FALSE,value=TRUE)) # change here for grouped class
 geneExpr <- assay(pb.stack, 1)
 rownames(geneExpr) <- rownames(pb.stack)
 geneExpr_keep=geneExpr[rownames(geneExpr) %in% PC_genes$gene_name,]
@@ -98,7 +98,7 @@ result <- geneExpr_cluster_cpm_by_donors_mat %>%
     select(genes, Tau.Score, Status) %>%
     left_join(geneExpr_cluster_cpm_by_donors_mat, ., by="genes")  # had to use dot since new columns are wanted at the end
 
-save(result,file=paste0(data_dir,"/tauscore_stacked_EN_data_developmental.RDATA"))
+save(result,file=paste0(data_dir,"/tauscore_EN_developmental.RDATA"))
 
 
 
