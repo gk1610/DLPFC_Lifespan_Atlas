@@ -19,13 +19,24 @@ import re
 import pynndescent
 from scipy.stats import zscore
 
+from synapseclient import Synapse
+# Set up the Synapse client
+syn = Synapse()
+syn.login()  # Assuming you're already logged in or have set up your credentials
 
-adata = sc.read_h5ad("./Aging_freeze3.0_50perc_std1_000.h5ad")
+# Define the directory and create it if it doesn't exist
+data_dir = "scDRS"
+os.makedirs(data_dir, exist_ok=True)
+
+# Download the entity to the specified directory
+syn62147251 = syn.get(entity="syn62147251", downloadLocation=data_dir)
+
+adata = sc.read_h5ad(syn62147251)
 adata
 
 scdrs.preprocess(adata, n_mean_bin=20, n_var_bin=20, copy=False)
 
-dict_gs = scdrs.util.load_gs('./all_ms_geneset_newOrd_agingsubset.gs',
+dict_gs = scdrs.util.load_gs('./custom_geneset.gs',
                             src_species="human",dst_species="human",to_intersect=adata.var_names)
 dict_gs.keys()
 
