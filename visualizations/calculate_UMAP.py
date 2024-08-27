@@ -31,8 +31,21 @@ import sys
 import pge
 pge.info()
 
+from synapseclient import Synapse
+# Set up the Synapse client
+syn = Synapse()
+syn.login()  # Assuming you're already logged in or have set up your credentials
+
+# Define the directory and create it if it doesn't exist
+data_dir = "newUMAP"
+os.makedirs(data_dir, exist_ok=True)
+
+# Download the entity to the specified directory
+syn62147251 = syn.get(entity="syn62147251", downloadLocation=data_dir)
+
+
 ## args
-orig_h5ad = './Aging_freeze3.0_full.h5ad'
+orig_h5ad = syn62147251
 new_h5ad = './freeze3_AGING_clean_lcg_autosome_100perc.h5ad'
 chunk_size = 500000
 
