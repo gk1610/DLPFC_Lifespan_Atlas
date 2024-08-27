@@ -1,11 +1,10 @@
-# PsychAD Lifespan PFC
-[PsychAD Lifespan PFC] A lifespan transcriptomic atlas of the human prefrontal cortex at single-cell resolution
+# DLPFC Lifespan Atlas
+ A single-cell transcriptomic atlas of the prefrontal cortex across the human lifespan
 
 # Dataset
-Supplementary data and tables are available at [Synapse DOI Link](https://www.synapse.org/)
+Supplementary data and tables are available at https://doi.org/10.7303/syn52396927
 
 # Citation
 Yang et. al., A lifespan transcriptomic atlas of the human prefrontal cortex at single-cell resolution
 
-# License
-MIT License
+
