@@ -45,9 +45,13 @@ syn62064718=synGet(entity="syn62064718",downloadLocation=data_dir)
 pb=readRDS(paste0(data_dir,"/lifespan_pseudobulk.rds"))
 colData(pb)$SubID=rownames(colData(pb))
 
+### keep only young, middle and late adulthood samples as they have tod information available 
+pb_subset=pb[,colData(pb)$Age>=20]
+colData(pb_subset)$SubID=rownames(colData(pb_subset))
+
 ## optimal covariates model
 form="~ scaled(Age) + Source + Sex + scale(PMI) + log(n_genes) + percent_mito + mito_genes + mito_ribo + ribo_genes"
-res.proc = processAssays(pb,as.formula(form))
+res.proc = processAssays(pb_subset,as.formula(form))
 res.dl = dreamlet(res.proc, as.formula(form))
 res_mat = residuals(res.dl,res.proc)
 
