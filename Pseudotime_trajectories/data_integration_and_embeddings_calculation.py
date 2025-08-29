@@ -24,7 +24,7 @@ sc.settings.n_jobs = 30
 sc.settings.set_figure_params( dpi=200, fontsize=6)
 
 
-###### Functions used to generate distinct list of hex colors ######
+###### Functions used to generate distinct list of hex colors ###### source from: https://github.com/ListerLab/pfc_development
 def get_random_color( pastel_factor=0.5):
 	return [( x+pastel_factor)/( 1.0+pastel_factor) for x in [random.uniform( 0,1.0) for i in [1,2,3]]]
 
