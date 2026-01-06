@@ -1,5 +1,4 @@
-# DLPFC Lifespan Atlas
-Lifespan single-cell transcriptomic atlas of the human prefrontal cortex  
+# Lifespan single-cell transcriptomic atlas of the human prefrontal cortex  
 
 Overview
 This repository contains code and analysis workflows for the DLPFC Lifespan Atlas, a comprehensive single-nucleus transcriptomic resource spanning the entire human lifespan. This work profiled 1.3 million nuclei from 284 postmortem samples (age 0-97 years) from the dorsolateral prefrontal cortex—a brain region central to cognitive function and vulnerable to age-related decline.
