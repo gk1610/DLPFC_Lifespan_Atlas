@@ -17,7 +17,7 @@ nuclei_metadata_info$class <- as.character(nuclei_metadata_info$class)
 
 ### extract all pathway scores here
 pathway_scores <- fread(
-"ORA_scores.csv")
+"ORA_brain_related_GO_pathways.csv")
 )
 pathway_scores <- as.data.frame(pathway_scores)
 rownames(pathway_scores) <- pathway_scores$V1
@@ -68,7 +68,7 @@ run_cluster_dream <- function(subset_meta, pathway_scores_subset,
     )
   )
   
-  # Run dream analysis
+  # Run dream analysis to compare the brain pathway scores across two groups
   fit <- dream(path_scores_matrix, formula, subset_meta, L)
   fit <- eBayes(fit)
   
