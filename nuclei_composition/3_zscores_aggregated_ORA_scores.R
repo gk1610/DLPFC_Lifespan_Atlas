@@ -8,8 +8,8 @@
 #   publication-quality heatmap.
 #
 # Input requirements:
-#   - ORA_aggregated_Scores_wls.RData: Aggregated ORA scores by subclass
-#   - Supplementary_Table3.csv: Metadata with subclass-to-cluster mapping
+#   - aggregated_brain_pathway_scores.RData: Aggregated ORA scores by subclass (26 X 374 data frame)
+#   - Supplementary_Table3.csv: Subclass with annotations to log_increasing or decreasing from  Extended Data Figure 1a
 #
 # Outputs:
 #   - Statistical test results (t-tests with FDR correction)
@@ -25,7 +25,7 @@ library(viridis)
 # ====== DATA LOADING ======
 
 # Load aggregated ORA scores (from single-nucleus analysis)
-load("ORA_aggregated_Scores_wls.RData")
+load("aggregated_brain_pathway_scores.RData")
 
 # Convert list to data frame and set subclass rownames
 agg_df <- bind_cols(agg_list)
