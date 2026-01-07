@@ -443,3 +443,516 @@ plot_heatmap_fitted_scdrs <- function(scdrs_list, lineages, branches, n_metacell
     save_pheatmap(ph, out_file, width=figure_width, height=figure_height)
 }
 
+################## Transcriptional regulator inference ##################
+identify_pt_tfs_ratio <- function(net, cds, genes, lineages, minsize = 5, ratio = 0.01){
+    pt_genes <- c()
+    for(lineage in lineages){
+        # Express matrix at metacells
+        expr <- t(cds@expression[[lineage]][, genes])
+        
+        # Infer TF activities using ulm (statistic, source, condition, score, p_value)
+        acts <- tryCatch({
+              decoupleR::run_ulm(
+                mat = expr,
+                net = net,
+                .source = 'source',
+                .target = 'target',
+                .mor = 'mor',
+                minsize = minsize
+              )
+            }, error = function(e) {
+              message("run_ulm() failed: ", e$message)
+              return(NULL)  # or return an empty tibble/data.frame if preferred
+            })
+        if (!is.null(acts)){
+            acts_formatted <- acts %>%
+                tidyr::pivot_wider(id_cols = 'source', 
+                                   names_from = 'condition',
+                                   values_from = 'p_value') %>%
+                tibble::column_to_rownames('source')
+            acts_formatted <- acts_formatted[, as.character(seq(1, 500, length.out = 500))]
+            res <- rownames(acts_formatted[rowSums(acts_formatted < 0.05) >= ratio*500, ])
+            
+            if(length(res) > 0) pt_genes <- union(pt_genes, res)
+        }
+    }
+    return(pt_genes)
+}
+
+# PPI network per module for both TF and gene
+ppi_per_celltype_tf_gene <- function(df_celltype, celltype_sel, module_sel, tf_list) {  
+  # Add is_TF column based on tf_list
+  df_celltype <- df_celltype %>%
+    mutate(is_TF = gene %in% tf_list)
+  
+  # Map genes to STRING identifiers
+  mapped_genes <- string_db$map(df_celltype, "gene", removeUnmappedRows = TRUE)
+  
+  # Retrieve PPI edges
+  ppi_df <- string_db$get_interactions(mapped_genes$STRING_id)
+  
+  # Subset to within-gene list interactions and remove duplicated edges
+  ppi_subset <- ppi_df %>%
+    filter(from %in% mapped_genes$STRING_id & to %in% mapped_genes$STRING_id) %>%
+    rowwise() %>%
+    mutate(pair = paste(sort(c(from, to)), collapse = "--")) %>%
+    ungroup() %>%
+    distinct(pair, .keep_all = TRUE) %>%
+    select(-pair)
+  
+  # Build graph
+  ppi_graph <- graph_from_data_frame(ppi_subset, directed = FALSE)
+  
+  # Map gene names
+  gene_map <- mapped_genes %>% select(STRING_id, gene)
+  V(ppi_graph)$gene <- gene_map$gene[match(V(ppi_graph)$name, gene_map$STRING_id)]
+  
+  # Remove unmapped vertices
+  ppi_graph <- delete_vertices(ppi_graph, is.na(V(ppi_graph)$gene))
+  
+  # Add gene type (TF or not)
+  V(ppi_graph)$is_TF <- V(ppi_graph)$gene %in% tf_list
+  V(ppi_graph)$shape <- ifelse(V(ppi_graph)$is_TF, "square", "circle")
+  
+  # Degree-based styling
+  deg <- degree(ppi_graph)
+  V(ppi_graph)$degree <- deg
+
+  # Label size: TFs = 6pt, others = 4pt
+  V(ppi_graph)$label.cex <- ifelse(V(ppi_graph)$is_TF, 6/12, 4/12)
+
+  # Label color:
+  # - TFs: always black
+  # - Genes: black if degree ≥ 5, else gray
+  V(ppi_graph)$label.color <- ifelse(
+    V(ppi_graph)$is_TF | deg >= 5, "black", "gray80"
+  )
+
+  # Font style:
+  # - Bold if degree ≥ 5, else normal
+  V(ppi_graph)$label.font <- ifelse(deg >= 5, 2, 1)
+  V(ppi_graph)$label.family <- "sans"
+    
+  # ✨ Assign color by component
+  comps <- components(ppi_graph)
+  V(ppi_graph)$component <- comps$membership
+  num_comps <- comps$no
+  palette_fn <- colorRampPalette(brewer.pal(8, "Dark2"))
+  comp_colors <- setNames(palette_fn(num_comps), as.character(1:num_comps))
+  V(ppi_graph)$color <- comp_colors[as.character(V(ppi_graph)$component)]
+  
+  # Plot
+  plot(ppi_graph,
+       vertex.label = V(ppi_graph)$gene,
+       vertex.label.cex = V(ppi_graph)$label.cex,
+       vertex.label.font = V(ppi_graph)$label.font,
+       vertex.label.family = V(ppi_graph)$label.family,
+       vertex.label.color = V(ppi_graph)$label.color,
+       vertex.color = V(ppi_graph)$color,
+       vertex.shape = V(ppi_graph)$shape,
+       edge.color = "gray40",
+       main = paste0("PPI network (", celltype_sel, " : ", module_sel, ")"))
+
+  # Legend
+  legend("bottomright", legend = c("TF", "Gene"), pch = c(22, 21),
+         pt.bg = "gray80", bty = "n", title = "Node type")
+
+  return(ppi_graph)
+}
+
+# PPI network per module for both TF and gene (only visualize those sub-networks size no less than 5)
+ppi_per_celltype_tf_gene_sel_5 <- function(df_celltype, celltype_sel, module_sel, tf_list) {
+  # df_celltype: gene, extTF
+  # Add is_TF column based on tf_list
+  df_celltype <- df_celltype %>%
+    mutate(is_TF = gene %in% tf_list)
+  
+  # Map genes to STRING identifiers
+  mapped_genes <- string_db$map(df_celltype, "gene", removeUnmappedRows = TRUE)
+  
+  # Retrieve PPI edges
+  ppi_df <- string_db$get_interactions(mapped_genes$STRING_id)
+  
+  # Subset to within-gene list interactions and remove duplicated edges
+  ppi_subset <- ppi_df %>%
+    filter(from %in% mapped_genes$STRING_id & to %in% mapped_genes$STRING_id) %>%
+    rowwise() %>%
+    mutate(pair = paste(sort(c(from, to)), collapse = "--")) %>%
+    ungroup() %>%
+    distinct(pair, .keep_all = TRUE) %>%
+    select(-pair)
+  
+  # Build graph
+  ppi_graph <- graph_from_data_frame(ppi_subset, directed = FALSE)
+  
+  # Map gene names
+  gene_map <- mapped_genes %>% select(STRING_id, gene)
+  V(ppi_graph)$gene <- gene_map$gene[match(V(ppi_graph)$name, gene_map$STRING_id)]
+  
+  # Remove unmapped vertices
+  ppi_graph <- delete_vertices(ppi_graph, is.na(V(ppi_graph)$gene))
+  
+  # Add gene type (TF or not)
+  V(ppi_graph)$is_TF <- V(ppi_graph)$gene %in% tf_list
+  V(ppi_graph)$shape <- ifelse(V(ppi_graph)$is_TF, "square", "circle")
+  
+  # Degree-based styling
+  deg <- degree(ppi_graph)
+  V(ppi_graph)$degree <- deg
+
+  # Label size: TFs = 6pt, others = 4pt
+  V(ppi_graph)$label.cex <- ifelse(V(ppi_graph)$is_TF, 6/12, 4/12)
+
+  # Label color:
+  # - TFs: always black
+  # - Genes: black if degree ≥ 5, else gray
+  V(ppi_graph)$label.color <- ifelse(
+    V(ppi_graph)$is_TF | deg >= 5, "black", "gray80"
+  )
+
+  # Font style:
+  # - Bold if degree ≥ 5, else normal
+  V(ppi_graph)$label.font <- ifelse(deg >= 5, 2, 1)
+  V(ppi_graph)$label.family <- "sans"
+    
+  # ✨ Identify and filter by component size
+  comps <- components(ppi_graph)
+  V(ppi_graph)$component <- comps$membership
+  
+  # Only keep components with ≥ 5 nodes
+  comp_sizes <- table(comps$membership)
+  keep_comps <- as.integer(names(comp_sizes[comp_sizes >= 5]))
+  ppi_graph <- induced_subgraph(ppi_graph, vids = V(ppi_graph)[component %in% keep_comps])
+  
+  # Recalculate component membership on the filtered graph
+  comps <- components(ppi_graph)
+  V(ppi_graph)$component <- comps$membership
+  num_comps <- comps$no
+    
+  if(num_comps > 0){
+      # Generate color palette for remaining components
+      palette_fn <- colorRampPalette(brewer.pal(8, "Dark2"))
+      comp_colors <- setNames(palette_fn(num_comps), as.character(1:num_comps))
+      V(ppi_graph)$color <- comp_colors[as.character(V(ppi_graph)$component)]
+    
+      
+      # Plot
+      plot(ppi_graph,
+           vertex.label = V(ppi_graph)$gene,
+           vertex.label.cex = V(ppi_graph)$label.cex,
+           vertex.label.font = V(ppi_graph)$label.font,
+           vertex.label.family = V(ppi_graph)$label.family,
+           vertex.label.color = V(ppi_graph)$label.color,
+           vertex.color = V(ppi_graph)$color,
+           vertex.shape = V(ppi_graph)$shape,
+           edge.color = "gray40",
+           main = paste0("PPI network (", celltype_sel, " : ", module_sel, ")"))
+    
+      # Legend
+      legend("bottomright", legend = c("TF", "Gene"), pch = c(22, 21),
+             pt.bg = "gray80", bty = "n", title = "Node type")
+    
+      return(ppi_graph)
+  }
+}
+
+# Classify TF status in network
+classify_tf_network_behavior <- function(ppi_graph, tf_list) {
+  tf_info <- data.frame(TF = tf_list, status = "Not in network", stringsAsFactors = FALSE)
+  
+  if (is.null(ppi_graph) || vcount(ppi_graph) == 0) {
+    return(tf_info)
+  }
+  
+  # Get components and degree
+  comps <- components(ppi_graph)
+  deg <- degree(ppi_graph)
+  V(ppi_graph)$component <- comps$membership
+  V(ppi_graph)$degree <- deg
+  
+  for (i in seq_along(tf_list)) {
+    tf <- tf_list[i]
+    v <- V(ppi_graph)[V(ppi_graph)$gene == tf]
+    if (length(v) == 1) {
+      comp_size <- comps$csize[V(ppi_graph)[v]$component]
+      tf_deg <- V(ppi_graph)[v]$degree
+      tf_info$status[i] <- dplyr::case_when(
+        comp_size >= 5 & tf_deg >= 3 ~ "Present, Comp≥5, Degree≥3",
+        comp_size >= 5 & tf_deg < 3  ~ "Present, Comp≥5, Degree<3",
+        comp_size < 5                ~ "Present, Comp<5",
+        TRUE                         ~ "Present"
+      )
+    }
+  }
+  
+  return(tf_info)
+}
+
+
+# Plot the presence of key TFs in networks
+plotKeyTFsPresence <- function(modules_sel, n_header = 3){
+  # step1. Identify key TFs
+  keyTFs <- c()
+  for(sub_module in modules_sel){
+      # PPI networks not less than 5 nodes
+      ppi_graph <- readRDS(paste0("data/inhouse/string-db/traDEG_modules/r_PPI_ext_TF_3_5_all_ratio_0.02_", sub_module, ".rds"))
+    
+      # ✨ Identify and filter by component size
+      comps <- components(ppi_graph)
+      V(ppi_graph)$component <- comps$membership
+      
+      # Only keep components with ≥ 5 nodes
+      comp_sizes <- table(comps$membership)
+      keep_comps <- as.integer(names(comp_sizes[comp_sizes >= 5]))
+      ppi_graph <- induced_subgraph(ppi_graph, vids = V(ppi_graph)[component %in% keep_comps])
+      
+      # Focus on the top 3 TFs with degree ≥ 3
+      if(!is.null(ppi_graph)){
+          tf_high_deg_sorted <- tibble(gene = V(ppi_graph)$gene, 
+                                       degree = V(ppi_graph)$degree, 
+                                       is_TF = V(ppi_graph)$is_TF) %>%
+          filter(is_TF, degree >= 3) %>%
+          arrange(desc(degree)) %>% 
+          head(n_header)
+          
+          keyTFs <- union(keyTFs, tf_high_deg_sorted$gene)
+      }
+  }
+
+  # step2. Classify the TF presence in PPI networks
+  tf_classifications <- lapply(modules_sel, function(mod){
+      graphs_by_module <- readRDS(paste0("data/inhouse/string-db/traDEG_modules/r_PPI_ext_TF_3_5_all_ratio_0.02_", mod, ".rds"))
+      classify_tf_network_behavior(graphs_by_module, keyTFs) %>%
+          mutate(module = mod)
+  })
+
+  df_tf_behavior <- bind_rows(tf_classifications)
+  df_tf_behavior$TF <- factor(df_tf_behavior$TF, levels = rev(keyTFs))
+  df_tf_behavior$module <- factor(df_tf_behavior$module, levels = modules_sel)
+  
+  df_tf_behavior$status <- factor(
+    df_tf_behavior$status,
+    levels = c("Present, Comp≥5, Degree≥3",
+               "Present, Comp≥5, Degree<3",
+               "Present, Comp<5",
+               "Not in network")
+  )
+
+  # step3. Prepare dot plot of TF presence in PPI networks
+  dot_plot <- ggplot(df_tf_behavior, aes(x = module, y = TF, color = status)) +
+    geom_point(aes(size = status), shape = 16) +
+    scale_color_manual(values = status_colors) +
+    scale_size_manual(values = c(5, 3, 2, 1)) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(title = "TF Presence and Network Context per Module",
+         y = "Transcription Factor",
+         x = "Module",
+         color = "Network Status",
+         size = "Network Status")
+  
+  # step4. Identify the source of TF
+  # Clean and standardize names
+  modules_clean <- lapply(modules, function(x) unique(trimws(as.character(x))))
+  infTFs_list_clean <- lapply(infTFs_list, function(x) unique(trimws(as.character(x))))
+  keyTFs_clean <- unique(trimws(as.character(keyTFs)))
+
+  # Diagnostic function
+  safe_membership_trace <- function(tf, mod, lst, source_name) {
+    if (!mod %in% names(lst)) {
+      message("⚠️ Module '", mod, "' not found in ", source_name)
+      return(FALSE)
+    }
+    contents <- lst[[mod]]
+    if (is.null(contents)) {
+      message("⚠️ NULL module content in ", source_name, " for ", mod)
+      return(FALSE)
+    }
+    if (!is.character(contents)) {
+      message("⚠️ Non-character contents in ", source_name, " for ", mod, ": class=", class(contents))
+      return(FALSE)
+    }
+    return(tf %in% contents)
+  }
+
+  # Build presence status safely
+  tfPresense <- expand.grid(TF = keyTFs_clean, module = modules_sel, stringsAsFactors = FALSE) %>%
+    mutate(
+      in_a = mapply(function(tf, mod) safe_membership_trace(tf, mod, modules_clean, "modules"), TF, module),
+      in_b = mapply(function(tf, mod) safe_membership_trace(tf, mod, infTFs_list_clean, "infTFs_list"), TF, module),
+      status = case_when(
+        in_a & in_b ~ "Both",
+        in_a & !in_b ~ "Included only",
+        !in_a & in_b ~ "Inferred only",
+        TRUE ~ "None"
+      )
+    )
+  df_keyTFs <- tfPresense[tfPresense$status != "None", ]
+  return(list(dot_plot = dot_plot, df_keyTFs = df_keyTFs))
+}
+
+# Longify and min-max normalization
+longify_norm <- function(df, value_name, tfs_of_interest, celltypes_ordered) {
+  df[, c('transcription_factor', celltypes_ordered)]  %>%
+    filter(transcription_factor %in% tfs_of_interest) %>%
+    pivot_longer(-transcription_factor, names_to = "celltype", values_to = value_name) %>%
+    mutate(celltype = factor(celltype, levels = celltypes_ordered)) %>%
+    group_by(transcription_factor) %>%
+    mutate(!!value_name := (get(value_name) - min(get(value_name), na.rm = TRUE)) /
+                            (max(get(value_name), na.rm = TRUE) - min(get(value_name), na.rm = TRUE))) %>%
+    ungroup()
+}
+                    
+# Compute square tile corners
+gen_square <- function(x, y) {
+  tibble(x = c(x - 0.5, x - 0.5, x + 0.5, x + 0.5),
+         y = c(y - 0.5, y + 0.5, y + 0.5, y - 0.5))
+}
+                    
+################## Visium validation ##################
+avg_PC1_per_spot <- function(genes){
+    df <- data.frame(PC1 = c(), BayesSpace_harmony_09 = c(), Sample_ID = c())
+    
+    genes <- rowData(spe)$gene_search[
+        rowData(spe)$gene_name %in% genes
+    ]
+    
+    if(length(genes) > 0){
+        for(sub_sample in unique(spe@int_metadata$imgData$sample_id)){
+            # Perform PCA
+            p09_sub <- vis_gene_pca(
+                    spe = spe,
+                    geneid = genes,
+                    sampleid = sub_sample,
+                    multi_gene_method = "pca",
+                    point_size = 1.5
+            )
+            
+            # Extract spatial metadata
+            spatial_data <- as.data.frame(colData(spe))
+            
+            # Ensure that the sample ID matches
+            spatial_data <- spatial_data[spatial_data$sample_id == sub_sample, ]
+            
+            spatial_data$PC1 <- p09_sub
+            
+            # Assuming "Sp09_cluster" is the column name for the Sp09 cluster values
+            ggplot_df <- spatial_data %>%
+                dplyr::select(PC1, BayesSpace_harmony_09)
+            
+            ggplot_df$Sample_ID <- sub_sample
+            
+            df <- rbind(df, ggplot_df)
+        }
+    }  
+    
+    df$BayesSpace_harmony_09 <- factor(df$BayesSpace_harmony_09, levels = c(1, 2, 3, 5, 8, 4, 7, 6, 9))    
+    return(df)
+}
+
+square_heatmap <- function(A, B = NULL,
+                           row_labels = NULL, col_labels = NULL,
+                           limits = NULL,
+                           size_range = c(0.2, 0.9),
+                           fill_sequential = "Reds",
+                           fill_diverging = "PRGn",
+                           base_fill = "white",
+                           base_border = "grey70",
+                           square_border = "grey30") {
+  
+  nrow <- nrow(A)
+  ncol <- ncol(A)
+  
+  if (is.null(B)) B <- matrix(1, nrow = nrow, ncol = ncol)
+  if (is.null(row_labels)) row_labels <- paste0("Row", 1:nrow)
+  if (is.null(col_labels)) col_labels <- paste0("Col", 1:ncol)
+  
+  # Build full data
+  df <- expand.grid(y = 1:nrow, x = 1:ncol) %>%
+    mutate(value = as.vector(unlist(A)),
+           size = rescale(as.vector(unlist(B)), to = size_range)) %>%
+    rowwise() %>%
+    mutate(
+      x_center = x - 0.5,
+      y_center = y - 0.5,
+      # Rescaled size square
+      xmin = x_center - size / 2,
+      xmax = x_center + size / 2,
+      ymin = y_center - size / 2,
+      ymax = y_center + size / 2,
+      # Base square (always full size)
+      base_xmin = x_center - 0.5,
+      base_xmax = x_center + 0.5,
+      base_ymin = y_center - 0.5,
+      base_ymax = y_center + 0.5
+    )
+
+  # Determine fill scale
+  val_range <- range(df$value, na.rm = TRUE)
+  if (is.null(limits)) limits <- val_range
+  fill_scale <- if (val_range[1] >= 0) {
+    scale_fill_gradientn(
+      colors = colorRampPalette(brewer.pal(9, fill_sequential))(100),
+      limits = limits,
+      oob = squish
+    )
+  } else {
+    scale_fill_gradientn(
+      # colors = rev(colorRampPalette(brewer.pal(11, fill_diverging))(100)),
+      colors = colorRampPalette(brewer.pal(11, fill_diverging))(100),
+      limits = limits,
+      oob = squish
+    )
+  }
+
+  # Plot
+  ggplot(df) +
+    # Base grid square
+    geom_rect(aes(xmin = base_xmin, xmax = base_xmax, ymin = base_ymin, ymax = base_ymax),
+              fill = base_fill, color = base_border, linewidth = 0.4) +
+    
+    # Value square
+    geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = value),
+              color = square_border) +
+    
+    fill_scale +
+    coord_fixed() +
+    scale_y_reverse(breaks = 1:nrow, labels = row_labels) +
+    scale_x_continuous(breaks = 1:ncol, labels = col_labels) +
+    theme_minimal(base_size = 14) +
+    labs(x = NULL, y = NULL, fill = "Value") +
+    theme(
+      panel.grid = element_blank(),
+      axis.text.x = element_text(angle = 90, hjust = 1),
+      axis.text.y = element_text(hjust = 1)
+    )
+}
+
+square_size_legend <- function(breaks, size_range = c(0.2, 0.9),
+                               title = "Size", fill = "grey60", border = "black") {
+  scaled_sizes <- rescale(breaks, to = size_range)
+  df <- data.frame(
+    value = breaks,
+    size = scaled_sizes,
+    x_center = 0,
+    y_center = seq_along(breaks)
+  ) %>%
+    mutate(
+      xmin = x_center - size / 2,
+      xmax = x_center + size / 2,
+      ymin = y_center - size / 2,
+      ymax = y_center + size / 2
+    )
+
+  ggplot(df) +
+    geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+              fill = fill, color = border) +
+    scale_y_continuous(breaks = df$y_center, labels = df$value) +
+    coord_fixed() +
+    labs(y = title, x = NULL) +
+    theme_void() +
+    theme(
+      axis.text.y = element_text(size = 10, hjust = 1),
+      plot.margin = margin(5, 10, 5, 5)
+    )
+}
